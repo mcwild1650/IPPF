@@ -1,0 +1,10 @@
+1. boundary data exchange
+2. configuration file handling
+3. output file handling
+4. field computation
+  4.1 compute Omega
+  4.2 compute Psi
+  4.3 compute velocities
+5. synthetic jet handling
+6. field initialization
+7. mesh initialization (positions)
