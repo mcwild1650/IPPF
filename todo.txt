@@ -10,6 +10,8 @@
 7. mesh initialization (positions)
 
 File structure:
+  tools.h/tools.c : contains helper functions for allocating
+      memory, calling MPI, etc.
   config.h/config.c : configuration file dialog
       and reading a configuration file in parallel
   grid.h/grid.c : given info from configuration, generates
