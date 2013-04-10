@@ -12,7 +12,7 @@ typedef struct {
 #define FILENAME_LENGTH 64
 
 typedef struct {
-  int Nx, Ny;
+  int Nx, My;
   double Re;
   double A;
   int Ot;
@@ -21,11 +21,12 @@ typedef struct {
   double Tol;
   int IBL;
   jet_config jet;
-  const char filename[FILENAME_LENGTH];
+  char filename[FILENAME_LENGTH];
   int psave;
 } config;
 
 void ask_config(config* c);
+void write_config(const char* filename, const config* c);
 void read_config(const char* filename, config* c);
 void broadcast_config(config* c);
 
