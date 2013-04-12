@@ -40,5 +40,14 @@ int main(int argc, char** argv)
   args a;
   if (!get_args(argc,argv,&a))
     return 0;
+  if (a.m == config_mode)
+  {
+  }
+  else if (a.m == run_mode)
+  {
+  }
+  else if (a.m == restart_mode)
+  {
+  }
   return 0;
 }

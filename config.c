@@ -99,8 +99,3 @@ void read_config(const char* filename, config* c)
   fscanf(file,"Save Steps %d\n",&(c->psave));
   fclose(file);
 }
-
-void broadcast_config(config* c)
-{
-  MPI_Bcast(c,sizeof(*c),MPI_BYTE,0,MPI_COMM_WORLD);
-}

@@ -1,8 +1,11 @@
 #include "tools.h"
+#ifdef PARALLEL
 #include <mpi.h>
+#endif
 #include <stdlib.h>
+#include <stdio.h>
 
-void die(const char* message) __attribute__((noreturn))
+void die(const char* message)
 {
   fprintf(stderr,"%s\n",message);
   abort();
@@ -24,6 +27,7 @@ void deallocate(void* memory)
     free(memory);
 }
 
+#ifdef PARALLEL
 void start_parallel(void)
 {
   MPI_Init(NULL,NULL);
@@ -47,3 +51,10 @@ void stop_parallel(void)
 {
   MPI_Finalize();
 }
+
+void broadcast(void* p, size_t s)
+{
+  MPI_Bcast(p,s,MPI_BYTE,0,MPI_COMM_WORLD);
+}
+#endif
+

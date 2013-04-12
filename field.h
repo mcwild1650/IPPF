@@ -16,7 +16,7 @@ typedef struct {
   field v;
 } fields;
 
-void make_fields(fields* f, config* c);
-void free_fields(fields* f, config* c);
+void make_fields(fields* f, int x, int y);
+void free_fields(fields* f);
 
 #endif

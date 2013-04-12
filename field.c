@@ -1,11 +1,13 @@
 #include "field.h"
+#include "tools.h"
 
 field make_field(int x, int y)
 {
+  int i;
   field f;
   ALLOCATE(f,y);
   ALLOCATE(f[0],y*x);
-  for (int i=1; i < y; ++i)
+  for (i=1; i < y; ++i)
     f[i] = f[i-1] + x;
   return f;
 }
@@ -33,7 +35,7 @@ void make_fields(fields* f, int x, int y)
   f->v = make_field(x2,y2);
 }
 
-void free_fields(fields* f, config* c)
+void free_fields(fields* f)
 {
   free_field(f->Omega);
   free_field(f->Psi);
