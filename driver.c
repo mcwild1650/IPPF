@@ -40,14 +40,21 @@ int main(int argc, char** argv)
   args a;
   if (!get_args(argc,argv,&a))
     return 0;
+  config c;
   if (a.m == config_mode)
   {
+    ask_config(&c);
+    printf("What would you like to call the configuration file?\n");
+    scanf("%s",a.configfile);
+    write_config(a.configfile,&c);
   }
   else if (a.m == run_mode)
   {
+    read_config(a.configfile,&c);
   }
   else if (a.m == restart_mode)
   {
+    read_config(a.configfile,&c);
   }
   return 0;
 }
