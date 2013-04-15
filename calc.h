@@ -10,15 +10,13 @@
 #define PI 3.14159265358979
 #define FLD(x) (s->f->x)
 #define DRV(x) (s->dr->x)
-#define JET(x) (s->c->jet->x)
+#define JET(x) (s->c->jet.x)
 #define CFG(x) (s->c->x)
 #define SPC(x) (s->sp->x)
-#define VOL(x) (s->x->v)
+#define VOL(x) (s->v->x)
 
 //derived constants
 typedef struct {
-  int step;
-  double time;
   double Kappasq,KappaA;
   double C,Cx,Cy,Cxd2,Cyd2;
   double dx,dy,dx2,dxsq,dysq,dy2;
@@ -26,7 +24,9 @@ typedef struct {
 } derived;
 
 //volatile variables, changing from iteration to iteration
-typdef struct {
+typedef struct {
+  int step;
+  double time;
   int Psi_k,tic1,tic2,ct;
   double Omega_tol;
   double Psi_tol;
@@ -37,6 +37,7 @@ typedef struct {
   fields* f;
   space* sp;
   config* c;
+  derived* dr;
   vol* v;
 } state;
 

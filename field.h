@@ -20,7 +20,7 @@ typedef struct {
   field Psi0i;
   field u;
   field v;
-  field DM
+  field DM;
   field DMsq;
 } fields;
 

@@ -1,12 +1,12 @@
 #include "field.h"
 #include "tools.h"
 
-field make_field(int x, int y, int total)
+field make_field(int x, int y, int size)
 {
   int i;
   field f;
   ALLOCATE(f,y);
-  ALLOCATE(f[0],total);
+  ALLOCATE(f[0],size);
   for (i=1; i < y; ++i)
     f[i] = f[i-1] + x;
   return f;
@@ -31,16 +31,16 @@ void make_fields(fields* f, int x, int y)
   int y2 = y;
   f->x=x;
   f->y=y;
-  f->total=x*y;
-  f->Omega = make_field(x2,y2,total);
-  f->Omega0 = make_field(x2,y2,total);
-  f->Psi = make_field(x2,y2,total);
-  f->Psi0 = make_field(x2,y2,total);
-  f->Psi0i = make_field(x2,y2,total);
-  f->u = make_field(x2,y2,total);
-  f->v = make_field(x2,y2,total);
-  f->DM = make_field(x2,y2,total);
-  f->DMsq = make_field(x2,y2,total);
+  f->size=x*y;
+  f->Omega = make_field(x2,y2,f->size);
+  f->Omega0 = make_field(x2,y2,f->size);
+  f->Psi = make_field(x2,y2,f->size);
+  f->Psi0 = make_field(x2,y2,f->size);
+  f->Psi0i = make_field(x2,y2,f->size);
+  f->u = make_field(x2,y2,f->size);
+  f->v = make_field(x2,y2,f->size);
+  f->DM = make_field(x2,y2,f->size);
+  f->DMsq = make_field(x2,y2,f->size);
 }
 
 void free_fields(fields* f)

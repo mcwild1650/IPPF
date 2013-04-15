@@ -1,7 +1,8 @@
-#include "calc.h"
+//#include "calc.h"
 #include "tools.h"
+#include "space.h"
 
-void make_space(space* s, int x, double dx,int y,double dy)
+void make_space(space* s, int x, double dx, int y,double dy)
 {
   int i;
   ALLOCATE(s->x,x+y);
@@ -14,7 +15,7 @@ void make_space(space* s, int x, double dx,int y,double dy)
     s->y[i]=s->y[i-1]+dy;
 }
   
-free_space(space* s)
+void free_space(space* s)
 {
   deallocate(s->x);
 }

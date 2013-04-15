@@ -6,6 +6,6 @@ typedef struct{
   double* y;
 } space;
 
-make_space(space* s, int x, int y);
-free_space(space* s);
+void make_space(space* s, int x, double dx, int y, double dy);
+void free_space(space* s);
 #endif
