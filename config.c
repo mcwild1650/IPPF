@@ -54,6 +54,10 @@ void ask_config(config* c)
   printf("How many iterations between incremental file writes?\n");
   printf("(use -1 to turn off incremental save)\n");
   scanf("%d",&(c->psave));
+  c->Xmin = -20;
+  c->Xmax =  20;
+  c->Ymin = 1;
+  c->Ymax = 11;
 }
 
 void write_config(const char* filename, const config* c)
@@ -98,4 +102,8 @@ void read_config(const char* filename, config* c)
   fscanf(file,"Filename %s\n",c->filename);
   fscanf(file,"Save Steps %d\n",&(c->psave));
   fclose(file);
+  c->Xmin = -20;
+  c->Xmax =  20;
+  c->Ymin = 1;
+  c->Ymax = 11;
 }

@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wfatal-errors
+CFLAGS= -Wfatal-errors
 LDFLAGS=-lm
 CC=mpicc
 

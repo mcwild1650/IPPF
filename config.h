@@ -23,6 +23,8 @@ typedef struct {
   jet_config jet;
   char filename[FILENAME_LENGTH];
   int psave;
+  double Xmin,Xmax;
+  double Ymin,Ymax;
 } config;
 
 void ask_config(config* c);

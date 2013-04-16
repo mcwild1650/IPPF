@@ -1,9 +1,6 @@
 #ifndef CALC_H
 #define CALC_H
 
-#include "space.h"
-#include "field.h"
-
 //a series of macros to make data access a little cleaner
 //assumes that the state is named s
 
@@ -17,9 +14,12 @@
 
 //derived constants
 typedef struct {
+  double dxsq,dysq;
+  double dx2,dy2;
   double Kappasq,KappaA;
-  double C,Cx,Cy,Cxd2,Cyd2;
-  double dx,dy,dx2,dxsq,dysq,dy2;
+  double C;
+  double Cx,Cy;
+  double Cxd2,Cyd2;
   double alpha,alphaX,alphaY;
 } derived;
 
@@ -32,16 +32,6 @@ typedef struct {
   double Psi_tol;
 } vol;
 
-//struct containing heirarchy of data for calculation
-typedef struct {
-  fields* f;
-  space* sp;
-  config* c;
-  derived* dr;
-  vol* v;
-} state;
-
-int initialize_all(state* state);
-int run_time_step(state* state);
+void init_derived(config* c, space* s, derived* d);
 
 #endif

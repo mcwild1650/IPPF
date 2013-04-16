@@ -149,3 +149,38 @@ int run_time_step(state* s)
 {
   return 0;
 }
+
+void init_derived(config* c, space* s, derived* d)
+{
+  double dx = s->dx;
+  double dy = s->dy;
+  double dxx = square(dx);
+  double dyy = square(dy);
+  d->dxsq = dxx;
+  d->dysq = dyy;
+  double dx2 = 2*dx;
+  double dy2 = 2*dy;
+  d->dx2 = dx2;
+  d->dy2 = dy2;
+  double dt = c->dt;
+  double Kappa2 = square(dx/dy);
+  d->Kappasq = Kappa2;
+  d->KappaA = 1/(2*(1.0+Kappa2));
+  double Cx = dt/dx;
+  double Cy = dt/dy;
+  d->Cx = Cx;
+  d->Cy = Cy;
+  double C = max(Cx,Cy);
+  d->C = C;
+  double Cx2 = 0.5*Cx;
+  double Cy2 = 0.5*Cy;
+  d->Cxd2 = Cx2;
+  d->Cyd2 = Cy2;
+  double Re = c->Re;
+  double alphaX = dt/(dxx*Re);
+  double alphaY = dt/(dyy*Re);
+  double alpha = 2*alphaX+2*alphaY;
+  d->alpha = alpha;
+  d->alphaX = alphaX;
+  d->alphaY = alphaY;
+}

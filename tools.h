@@ -15,4 +15,7 @@ void stop_parallel(void);
 void broadcast(void* p, size_t s);
 #define BROADCAST(o) broadcast(&(o),sizeof(o))
 
+double square(double x);
+double max(double a, double b);
+
 #endif
