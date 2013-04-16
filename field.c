@@ -57,38 +57,3 @@ void free_fields(fields* f)
   free_field(f->DMsq);
 }
 
-void init_fields(config* c, space* s, fields* f)
-{
-  int i,j;
-  int My = f->y;
-  int Nx = f->x;
-  field u = f->u;
-  field v = f->u;
-  field DM = s->f->DM;
-  field DM2 = s->f->DMsq;
-  field Psi = s->f->Psi;
-  field Omega = s->f->Omega;
-  double* x = s->sp->x;
-  double* y = s->sp->y;
-  double A = s->c->A;
-  double dyy = s->dr->dysq;
-  for(i=0; i<My+2; ++i)
-    for(j=0; j<Nx+2; ++j) {
-      DM2[i][j]=square(x[j])+square(y[i]);
-      DM[i][j]=sqrt(DM2[i][j]);
-    }
-  for(i=1; i<My+2; ++i)
-    for(j=0; j<Nx+2; ++j) {
-      v[i][j]=-(y[i]-1)/DM[i][j];
-      u[i][j]=(x[j]+A)/DM[i][j];
-      Psi[i][j]=(x[j]+A)*(y[i]-1);
-      Omega[i][j]=0;
-    }
-  for(j=0; j<Nx+2; ++j) {
-    v[0][j]=-(y[0]-1)/DM[0][j];
-    u[0][j]=0;
-    Psi[0][j]=(x[j]+A)*(y[0]-1);
-    Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
-  }
-}
-

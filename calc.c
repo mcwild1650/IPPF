@@ -4,6 +4,7 @@
 #include "restart.h"
 #include "config.h"
 #include "grid.h"
+#include "driver.h"
 #include <mpi.h>
 #include <math.h>
 #include <stdlib.h>
@@ -24,7 +25,7 @@ static double field_max_difference(int Nx,int My,field A, field B)
 static int set_boundaries(state* s)
 {
   int i,j;
-  const double amewa=(JET(ia)*((CFG(Nx)+1)/2+1))*DRV(dx);
+  const double amewa=(JET(ia)*((CFG(Nx)+1)/2+1))*SPC(dx);
   const double f=sin(2*PI*JET(freq)*VOL(time));
 
   // Upper and Lower BCs
@@ -43,7 +44,7 @@ static int set_boundaries(state* s)
       FLD(v)[0][j]=JET(c0)*f;
     if(j>=JET(ia)-2 && j<=JET(ib))
       FLD(Omega)[0][j]+=(FLD(v)[0][j+1]*sqrt(SPC(x)[j+1]*SPC(x)[j+1]+1)
-        -FLD(v)[0][j-1]*sqrt(SPC(x)[j-1]*SPC(x)[j-1]+1))/(2*DRV(dx))/FLD(DMsq)[0][j];
+        -FLD(v)[0][j-1]*sqrt(SPC(x)[j-1]*SPC(x)[j-1]+1))/(2*SPC(dx))/FLD(DMsq)[0][j];
     FLD(Omega)[CFG(My)+1][j]=0;
     FLD(Psi)[CFG(My)+1][j]=(SPC(x)[j]+CFG(A))*(SPC(y)[CFG(My)+1]-1);
     FLD(u)[CFG(My)+1][j]=(SPC(x)[j]+CFG(A))/FLD(DM)[CFG(My)+1][j];
@@ -210,4 +211,39 @@ void init_derived(config* c, space* s, derived* d)
   d->alpha = alpha;
   d->alphaX = alphaX;
   d->alphaY = alphaY;
+}
+
+void init_fields(config* c, space* s, derived* d, fields* f)
+{
+  int i,j;
+  int My = f->y;
+  int Nx = f->x;
+  field u = f->u;
+  field v = f->u;
+  field DM = f->DM;
+  field DM2 = f->DMsq;
+  field Psi = f->Psi;
+  field Omega = f->Omega;
+  double* x = s->x;
+  double* y = s->y;
+  double A = c->A;
+  double dyy = d->dysq;
+  for(i=0; i<My+2; ++i)
+    for(j=0; j<Nx+2; ++j) {
+      DM2[i][j]=square(x[j])+square(y[i]);
+      DM[i][j]=sqrt(DM2[i][j]);
+    }
+  for(i=1; i<My+2; ++i)
+    for(j=0; j<Nx+2; ++j) {
+      v[i][j]=-(y[i]-1)/DM[i][j];
+      u[i][j]=(x[j]+A)/DM[i][j];
+      Psi[i][j]=(x[j]+A)*(y[i]-1);
+      Omega[i][j]=0;
+    }
+  for(j=0; j<Nx+2; ++j) {
+    v[0][j]=-(y[0]-1)/DM[0][j];
+    u[0][j]=0;
+    Psi[0][j]=(x[j]+A)*(y[0]-1);
+    Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
+  }
 }

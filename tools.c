@@ -27,6 +27,17 @@ void deallocate(void* memory)
     free(memory);
 }
 
+double square(double x)
+{
+  return x*x;
+}
+
+double max(double a, double b)
+{
+  if (b>a) return b;
+  return a;
+}
+
 #ifdef PARALLEL
 void start_parallel(void)
 {
@@ -56,17 +67,6 @@ void broadcast(void* p, size_t s)
 {
   MPI_Bcast(p,s,MPI_BYTE,0,MPI_COMM_WORLD);
 }
-
-double square(double x)
-{
-  return x*x;
-}
-
-double max(double a, double b)
-{
-  if (b>a) return b;
-  return a;
-}
-
 #endif
+
 

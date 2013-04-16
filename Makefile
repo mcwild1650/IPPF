@@ -1,6 +1,5 @@
-CFLAGS= -Wfatal-errors
+CFLAGS=-Wall -Wfatal-errors
 LDFLAGS=-lm
-CC=mpicc
 
 all: ippf serial
 

@@ -1,4 +1,5 @@
 #include "driver.h"
+#include "tools.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -57,10 +58,10 @@ void free_state(state* s)
 
 void init_state(state* s)
 {
-  make_fields(s->f,s->c->Nx,c->My);
-  init_space(c,s->sp);
-  init_fields(c,s->sp,s->f);
-  init_derived(s->dr);
+  make_fields(s->f,s->c->Nx,s->c->My);
+  init_space(s->c,s->sp);
+  init_fields(s->c,s->sp,s->dr,s->f);
+  init_derived(s->c,s->sp,s->dr);
 }
 
 int main(int argc, char** argv)
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
     return 0;
   state s;
   make_state(&s);
-  config* c = s->c;
+  config* c = s.c;
   if (a.m == config_mode)
   {
     ask_config(c);

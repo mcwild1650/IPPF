@@ -2,6 +2,7 @@
 #define FIELD_H
 
 #include "config.h"
+#include "space.h"
 
 typedef double** field;
 
@@ -25,7 +26,6 @@ typedef struct {
 } fields;
 
 void make_fields(fields* f, int x, int y);
-void init_fields(config* c, space* s, fields* f);
 void free_fields(fields* f);
 
 #endif

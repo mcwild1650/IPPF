@@ -1,6 +1,10 @@
 #ifndef CALC_H
 #define CALC_H
 
+#include "config.h"
+#include "space.h"
+#include "field.h"
+
 //a series of macros to make data access a little cleaner
 //assumes that the state is named s
 
@@ -33,5 +37,6 @@ typedef struct {
 } vol;
 
 void init_derived(config* c, space* s, derived* d);
+void init_fields(config* c, space* s, derived* d, fields* f);
 
 #endif
