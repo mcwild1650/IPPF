@@ -4,9 +4,11 @@ CC=mpicc
 
 all: ippf serial
 
-ippf:
-	$(CC) $(CFLAGS) config.c calc.c driver.c field.c restart.c \
-	space.c tools.c $(LDFLAGS) -o ippf
+HEADERS=config.h calc.h driver.h field.h restart.h space.h tools.h
+SRC=config.c calc.c driver.c field.c restart.c space.c tools.c
+
+ippf: $(SRC) $(HEADERS)
+	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o ippf
 
 serial:
 	$(CC) $(CFLAGS) ParabolaFlow_v3_2.c $(LDFLAGS) -o serial

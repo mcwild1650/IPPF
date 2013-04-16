@@ -91,51 +91,78 @@ static int velocity_calc(state* s)
 
 static int psi_calc(state* s)
 {
-  VOL(Psi_k)=0;
+  int Psi_k=0;
+  int My=CFG(My);
+  int Nx=CFG(Nx);
+  double Psi_tol=1;
+  double KappaA=DRV(KappaA);
+  double Kappasq=DRV(Kappasq);
+  double dxsq=DRV(dxsq);
+
+  field Psi=FLD(Psi);
+  field Psi0i=FLD(Psi0i);
+  field Omega=FLD(Omega);
+  field DMsq=FLD(DMsq);
+  
   field temp;
   int i,j;
-  while(VOL(Psi_tol)>CFG(Tol)) {
-   ++VOL(Psi_k);
-   VOL(Psi_tol)=0;
+  while((Psi_tol)>CFG(Tol)) {
+   ++(Psi_k);
+   (Psi_tol)=0;
 
-   temp=FLD(Psi0i);
-   FLD(Psi0i)=FLD(Psi);
-   FLD(Psi)=temp;
+   temp=(Psi0i);
+   (Psi0i)=(Psi);
+   (Psi)=temp;
 
-   for(i=1; i<CFG(My)+1; ++i)
-     for(j=1; j<CFG(Nx)+1; ++j) {
-       FLD(Psi)[i][j]=DRV(KappaA)*(DRV(dxsq)*
-                      FLD(Omega)[i][j]*FLD(DMsq)[i][j]+
-                      FLD(Psi0i)[i][j+1]+
-                      FLD(Psi0i)[i][j-1]+
-                      DRV(Kappasq)*(FLD(Psi0i)[i+1][j]+
-                      FLD(Psi0i)[i-1][j]));
-       if(fabs(FLD(Psi)[i][j]-FLD(Psi0i)[i][j])>VOL(Psi_tol))
-         VOL(Psi_tol)=fabs(FLD(Psi)[i][j]-FLD(Psi0i)[i][j]);
+   for(i=1; i<(My)+1; ++i)
+     for(j=1; j<(Nx)+1; ++j) {
+       (Psi)[i][j]=(KappaA)*((dxsq)*
+                      (Omega)[i][j]*(DMsq)[i][j]+
+                      (Psi0i)[i][j+1]+
+                      (Psi0i)[i][j-1]+
+                      (Kappasq)*((Psi0i)[i+1][j]+
+                      (Psi0i)[i-1][j]));
+       if(fabs((Psi)[i][j]-(Psi0i)[i][j])>(Psi_tol))
+         (Psi_tol)=fabs((Psi)[i][j]-(Psi0i)[i][j]);
      }
   }
+  VOL(Psi_k)=Psi_k;
+  VOL(Psi_tol)=Psi_tol;
   return 0;
 }
 
 static int omega_calc(state* s)
 {
   int i,j;
-  for(i=1;i<CFG(My)+1;++i)
-  for(j=1;j<CFG(Nx)+1;++j)
+  field Omega=FLD(Omega);
+  field Omega0=FLD(Omega0);
+  field DMsq=FLD(DMsq);
+  field u=FLD(u);
+  field v=FLD(v);
+  field DM=FLD(DM);
+  double alpha=DRV(alpha);
+  double alphaX=DRV(alphaX);
+  double alphaY=DRV(alphaY);
+  double Cxd2=DRV(Cxd2);
+  double Cyd2=DRV(Cyd2);
+  int My=CFG(My);
+  int Nx=CFG(Nx);
+  for(i=1;i<My+1;++i)
+  for(j=1;j<Nx+1;++j)
   {
-    FLD(Omega)[i][j]=FLD(Omega0)[i][j]*(1-DRV(alpha)/FLD(DMsq)[i][j])+
-                     FLD(Omega0)[i][j+1]*
-                     (-DRV(Cxd2)*FLD(u)[i][j+1]*FLD(DM)[i][j+1]+
-                     DRV(alphaX))/FLD(DMsq)[i][j]+
-                     FLD(Omega0)[i][j-1]*(DRV(Cxd2)*
-                     FLD(u)[i][j-1]*FLD(DM)[i][j-1]+
-                     DRV(alphaX))/FLD(DMsq)[i][j]+
-                     FLD(Omega0)[i+1][j]*
-                     (-DRV(Cyd2)*FLD(v)[i+1][j]*FLD(DM)[i+1][j]+
-                     DRV(alphaY))/FLD(DMsq)[i][j]+
-                     FLD(Omega0)[i-1][j]*
-                     (DRV(Cyd2)*FLD(v)[i-1][j]*FLD(DM)[i-1][j]+
-                     DRV(alphaY))/FLD(DMsq)[i][j];
+    Omega[i][j]=Omega0[i][j]*(1-alpha/(DMsq)[i][j])+
+                     Omega0[i][j+1]*
+                     (-(Cxd2)*(u)[i][j+1]*(DM)[i][j+1]+
+                     alphaX)/(DMsq)[i][j]+
+                     Omega0[i][j-1]*((Cxd2)*
+                     (u)[i][j-1]*(DM)[i][j-1]+
+                     alphaX)/(DMsq)[i][j]+
+                     Omega0[i+1][j]*
+                     (-(Cyd2)*(v)[i+1][j]*(DM)[i+1][j]+
+                     alphaY)/(DMsq)[i][j]+
+                     Omega0[i-1][j]*
+                     ((Cyd2)*(v)[i-1][j]*(DM)[i-1][j]+
+                     alphaY)/(DMsq)[i][j];
   }
   return 0;
 }
