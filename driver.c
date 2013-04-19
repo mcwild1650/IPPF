@@ -83,6 +83,7 @@ int main(int argc, char** argv)
   {
     read_config(a.configfile,c);
     init_state(&s);
+    calculate(s.c,s.sp,s.f,s.dr,s.v);
   }
   else if (a.m == restart_mode)
   {

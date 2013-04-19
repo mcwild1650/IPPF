@@ -4,178 +4,189 @@
 #include "restart.h"
 #include "config.h"
 #include "grid.h"
-#include "driver.h"
-#include <mpi.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
-static double field_max_difference(int Nx,int My,field A, field B)
+static int set_boundaries(
+    config* c,
+    space* s,
+    double t,
+    fields* fld,
+    derived* d)
 {
   int i,j;
-  double max_diff=0;
-  for(i=0;i<My;++i)
-  for(j=0;j<Nx;++j)
-  {
-    if(fabs(A[i][j]-B[i][j])>max_diff)
-      max_diff=fabs(A[i][j]-B[i][j]);
-  }
-  return max_diff;
-}
-
-static int set_boundaries(state* s)
-{
-  int i,j;
-  const double amewa=(JET(ia)*((CFG(Nx)+1)/2+1))*SPC(dx);
-  const double f=sin(2*PI*JET(freq)*VOL(time));
+  jet_config* jet = &(c->jet);
+  int ia = jet->ia;
+  int ib = jet->ib;
+  double c0 = jet->c0;
+  double freq = jet->ia;
+  int Nx = c->Nx;
+  int My = c->My;
+  double A = c->A;
+  int IBL = c->IBL;
+  double dx = s->dx;
+  double* x = s->x;
+  double* y = s->y;
+  field Psi = fld->Psi;
+  field Omega = fld->Omega;
+  field u = fld->u;
+  field v = fld->v;
+  field DMsq = fld->DMsq;
+  field DM = fld->DM;
+  const double amewa=(ia*((Nx+1)/2+1))*dx;
+  const double f=sin(2*PI*freq*t);
+  double dy2 = d->dy2;
 
   // Upper and Lower BCs
-  for(j=0; j<CFG(Nx)+2; ++j) {
-    FLD(Psi)[0][j]=0;
-    if(j>=JET(ia)-1 && j<=JET(ib)-1)
-      FLD(Psi)[0][j]=(-JET(c0)*(-0.5*amewa*sqrt(amewa*amewa+1)-0.5*sinh(amewa)
-          +0.5*SPC(x)[j]*sqrt(SPC(x)[j]*SPC(x)[j]+1)+0.5*sinh(SPC(x)[j])))*f;
-    if(j>JET(ib)-1)
-      FLD(Psi)[0][j]=FLD(Psi)[0][JET(ib)-1];
-    FLD(Omega)[0][j]=(7*FLD(Psi)[0][j]-8*FLD(Psi)[1][j]+
-                     FLD(Psi)[2][j])/(2*DRV(dy2))/FLD(DMsq)[0][j];
-    FLD(u)[0][j]=0;
-    FLD(v)[0][j]=0;
-    if(j>JET(ia)-1 && j<JET(ib)-1)
-      FLD(v)[0][j]=JET(c0)*f;
-    if(j>=JET(ia)-2 && j<=JET(ib))
-      FLD(Omega)[0][j]+=(FLD(v)[0][j+1]*sqrt(SPC(x)[j+1]*SPC(x)[j+1]+1)
-        -FLD(v)[0][j-1]*sqrt(SPC(x)[j-1]*SPC(x)[j-1]+1))/(2*SPC(dx))/FLD(DMsq)[0][j];
-    FLD(Omega)[CFG(My)+1][j]=0;
-    FLD(Psi)[CFG(My)+1][j]=(SPC(x)[j]+CFG(A))*(SPC(y)[CFG(My)+1]-1);
-    FLD(u)[CFG(My)+1][j]=(SPC(x)[j]+CFG(A))/FLD(DM)[CFG(My)+1][j];
-    FLD(v)[CFG(My)+1][j]=-(SPC(y)[CFG(My)+1]-1)/FLD(DM)[CFG(My)+1][j];
+  for(j=0; j<Nx+2; ++j) {
+    Psi[0][j]=0;
+    if(j>=ia-1 && j<=ib-1)
+      Psi[0][j]=(-c0*(-0.5*amewa*sqrt(amewa*amewa+1)-0.5*sinh(amewa)
+          +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
+    if(j>ib-1)
+      Psi[0][j]=Psi[0][ib-1];
+    Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dy2)/DMsq[0][j];
+    u[0][j]=0;
+    v[0][j]=0;
+    if(j>ia-1 && j<ib-1)
+      v[0][j]=c0*f;
+    if(j>=ia-2 && j<=ib)
+      Omega[0][j]+=(v[0][j+1]*sqrt(x[j+1]*x[j+1]+1)
+        -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
+    Omega[My+1][j]=0;
+    Psi[My+1][j]=(x[j]+A)*(y[My+1]-1);
+    u[My+1][j]=(x[j]+A)/DM[My+1][j];
+    v[My+1][j]=-(y[My+1]-1)/DM[My+1][j];
   }
 
   // Side BCs
-  for(i=1; i<CFG(My)+1; ++i) {
-    if(i<CFG(IBL)) {
-      FLD(Omega)[i][0]=FLD(Omega)[i][1];
-      FLD(Psi)[i][0]=FLD(Psi)[i][1];
-      FLD(u)[i][0]=FLD(u)[i][1];
-      FLD(v)[i][0]=FLD(v)[i][1];
-      FLD(Omega)[i][CFG(Nx)+1]=FLD(Omega)[i][CFG(Nx)];
-      FLD(Psi)[i][CFG(Nx)+1]=FLD(Psi)[i][CFG(Nx)];
-      FLD(u)[i][CFG(Nx)+1]=FLD(u)[i][CFG(Nx)];
-      FLD(v)[i][CFG(Nx)+1]=FLD(v)[i][CFG(Nx)];
+  for(i=1; i<My+1; ++i) {
+    if(i<IBL) {
+      Omega[i][0]=Omega[i][1];
+      Psi[i][0]=Psi[i][1];
+      u[i][0]=u[i][1];
+      v[i][0]=v[i][1];
+      Omega[i][Nx+1]=Omega[i][Nx];
+      Psi[i][Nx+1]=Psi[i][Nx];
+      u[i][Nx+1]=u[i][Nx];
+      v[i][Nx+1]=v[i][Nx];
     }
     else {
-      FLD(Omega)[i][0]=0;
-      FLD(Psi)[i][0]=(SPC(x)[0]+CFG(A))*(SPC(y)[i]-1);
-      FLD(u)[i][0]=(SPC(x)[0]+CFG(A))/FLD(DM)[i][0];
-      FLD(v)[i][0]=-(SPC(y)[i]-1)/FLD(DM)[i][0];
-      FLD(Omega)[i][CFG(Nx)+1]=0;
-      FLD(Psi)[i][CFG(Nx)+1]=(SPC(x)[CFG(Nx)+1]+CFG(A))*(SPC(y)[i]-1);
-      FLD(u)[i][CFG(Nx)+1]=(SPC(x)[CFG(Nx)+1]+CFG(A))/FLD(DM)[i][CFG(Nx)+1];
-      FLD(v)[i][CFG(Nx)+1]=-(SPC(y)[i]-1)/FLD(DM)[i][CFG(Nx)+1];
+      Omega[i][0]=0;
+      Psi[i][0]=(x[0]+A)*(y[i]-1);
+      u[i][0]=(x[0]+A)/DM[i][0];
+      v[i][0]=-(y[i]-1)/DM[i][0];
+      Omega[i][Nx+1]=0;
+      Psi[i][Nx+1]=(x[Nx+1]+A)*(y[i]-1);
+      u[i][Nx+1]=(x[Nx+1]+A)/DM[i][Nx+1];
+      v[i][Nx+1]=-(y[i]-1)/DM[i][Nx+1];
     }
   }
   return 0;
 }
 
-static int velocity_calc(state* s)
+static void velocity_calc(
+    config* c,
+    fields* f,
+    derived* d)
 {
-  // Calculate velocities
   int i,j;
-  for(i=1; i<CFG(My)+1; ++i)
-  for(j=1; j<CFG(Nx)+1; ++j)
+  field u = f->u;
+  field v = f->v;
+  field Psi = f->Psi;
+  field DM = f->DM;
+  const int Nx = c->Nx;
+  const int My = c->My;
+  const double dx2 = d->dx2;
+  const double dy2 = d->dy2;
+  for(i=1; i<My+1; ++i)
+  for(j=1; j<Nx+1; ++j)
   {
-    FLD(u)[i][j]=(FLD(Psi)[i+1][j]-FLD(Psi)[i-1][j])/DRV(dx2)/FLD(DM)[i][j];
-    FLD(v)[i][j]=-(FLD(Psi)[i][j+1]-FLD(Psi)[i][j-1])/DRV(dx2)/FLD(DM)[i][j];
+    u[i][j]= (Psi[i+1][j]-Psi[i-1][j])/dy2/DM[i][j];
+    v[i][j]=-(Psi[i][j+1]-Psi[i][j-1])/dx2/DM[i][j];
   }
-  return 0;
 }
 
-static int psi_calc(state* s)
+static double one_psi_calc(
+    config* c,
+    fields* f,
+    field Psi,
+    field Psi0i,
+    derived* d)
 {
-  int Psi_k=0;
-  int My=CFG(My);
-  int Nx=CFG(Nx);
-  double Psi_tol=1;
-  double KappaA=DRV(KappaA);
-  double Kappasq=DRV(Kappasq);
-  double dxsq=DRV(dxsq);
-
-  field Psi=FLD(Psi);
-  field Psi0i=FLD(Psi0i);
-  field Omega=FLD(Omega);
-  field DMsq=FLD(DMsq);
-  
-  field temp;
+  int Nx = c->Nx;
+  int My = c->My;
+  field DMsq = f->DMsq;
+  field Omega = f->Omega;
+  double KappaA = d->KappaA;
+  double Kappasq = d->Kappasq;
+  double dxsq = d->dxsq;
+  double Psi_tol = 0;
   int i,j;
-  while((Psi_tol)>CFG(Tol)) {
-   ++(Psi_k);
-   (Psi_tol)=0;
-
-   temp=(Psi0i);
-   (Psi0i)=(Psi);
-   (Psi)=temp;
-
-   for(i=1; i<(My)+1; ++i)
-     for(j=1; j<(Nx)+1; ++j) {
-       (Psi)[i][j]=(KappaA)*((dxsq)*
-                      (Omega)[i][j]*(DMsq)[i][j]+
-                      (Psi0i)[i][j+1]+
-                      (Psi0i)[i][j-1]+
-                      (Kappasq)*((Psi0i)[i+1][j]+
-                      (Psi0i)[i-1][j]));
-       if(fabs((Psi)[i][j]-(Psi0i)[i][j])>(Psi_tol))
-         (Psi_tol)=fabs((Psi)[i][j]-(Psi0i)[i][j]);
-     }
-  }
-  VOL(Psi_k)=Psi_k;
-  VOL(Psi_tol)=Psi_tol;
-  return 0;
+  for(i=1; i<My+1; ++i)
+    for(j=1; j<Nx+1; ++j) {
+      Psi[i][j]=
+        KappaA*
+//todo: build a matrix of these:
+         (dxsq*Omega[i][j]*DMsq[i][j]+
+          Psi0i[i][j+1]+
+          Psi0i[i][j-1]+
+          Kappasq*(Psi0i[i+1][j]+
+                   Psi0i[i-1][j]));
+      if(fabs(Psi[i][j]-Psi0i[i][j])>Psi_tol)
+        Psi_tol=fabs((Psi)[i][j]-(Psi0i)[i][j]);
+    }
+  return Psi_tol;
 }
 
-static int omega_calc(state* s)
+static void psi_calc(
+    config* c,
+    fields* f,
+    derived* d,
+    vol* vl)
+{
+  int Psi_k;
+  double Tol = c->Tol;
+  double Psi_tol = one_psi_calc(c,f,f->Psi,f->Psi0,d);
+  Psi_k = 1;
+  while (Psi_tol > Tol) {
+     swap_fields(&(f->Psi),&(f->Psi0i));
+     Psi_tol = one_psi_calc(c,f,f->Psi,f->Psi0i,d);
+     ++(Psi_k);
+  }
+  vl->Psi_k=Psi_k;
+  vl->Psi_tol=Psi_tol;
+}
+
+static void omega_calc(
+    config* c,
+    fields* f,
+    derived* d)
 {
   int i,j;
-  field Omega=FLD(Omega);
-  field Omega0=FLD(Omega0);
-  field DMsq=FLD(DMsq);
-  field u=FLD(u);
-  field v=FLD(v);
-  field DM=FLD(DM);
-  double alpha=DRV(alpha);
-  double alphaX=DRV(alphaX);
-  double alphaY=DRV(alphaY);
-  double Cxd2=DRV(Cxd2);
-  double Cyd2=DRV(Cyd2);
-  int My=CFG(My);
-  int Nx=CFG(Nx);
+  field Omega=f->Omega;
+  field Omega0=f->Omega0;
+  field DMsq=f->DMsq;
+  field u=f->u;
+  field v=f->v;
+  field DM=f->DM;
+  double alpha=d->alpha;
+  double alphaX=d->alphaX;
+  double alphaY=d->alphaY;
+  double Cxd2=d->Cxd2;
+  double Cyd2=d->Cyd2;
+  int My=c->My;
+  int Nx=c->Nx;
   for(i=1;i<My+1;++i)
   for(j=1;j<Nx+1;++j)
   {
-    Omega[i][j]=Omega0[i][j]*(1-alpha/(DMsq)[i][j])+
-                     Omega0[i][j+1]*
-                     (-(Cxd2)*(u)[i][j+1]*(DM)[i][j+1]+
-                     alphaX)/(DMsq)[i][j]+
-                     Omega0[i][j-1]*((Cxd2)*
-                     (u)[i][j-1]*(DM)[i][j-1]+
-                     alphaX)/(DMsq)[i][j]+
-                     Omega0[i+1][j]*
-                     (-(Cyd2)*(v)[i+1][j]*(DM)[i+1][j]+
-                     alphaY)/(DMsq)[i][j]+
-                     Omega0[i-1][j]*
-                     ((Cyd2)*(v)[i-1][j]*(DM)[i-1][j]+
-                     alphaY)/(DMsq)[i][j];
+    Omega[i][j]=Omega0[i][j]*(1-alpha/DMsq[i][j])+
+                Omega0[i][j+1]*(-Cxd2*u[i][j+1]*DM[i][j+1]+alphaX)/DMsq[i][j]+
+                Omega0[i][j-1]*( Cxd2*u[i][j-1]*DM[i][j-1]+alphaX)/DMsq[i][j]+
+                Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
+                Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
-  return 0;
-}
-
-int initialize_all(state* s)
-{
-  return 0;
-}
-
-int run_time_step(state* s)
-{
-  return 0;
 }
 
 void init_derived(config* c, space* s, derived* d)
@@ -213,6 +224,15 @@ void init_derived(config* c, space* s, derived* d)
   d->alphaY = alphaY;
 }
 
+void init_volatile(
+    config* c,
+    int k,
+    vol* v)
+{
+  v->step = k;
+  v->time = k*(c->dt);
+}
+
 void init_fields(config* c, space* s, derived* d, fields* f)
 {
   int i,j;
@@ -245,5 +265,75 @@ void init_fields(config* c, space* s, derived* d, fields* f)
     u[0][j]=0;
     Psi[0][j]=(x[j]+A)*(y[0]-1);
     Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
+  }
+}
+
+static double field_max_difference(int Nx,int My,field A, field B)
+{
+  int i,j;
+  double max_diff=0;
+  for(i=0;i<My;++i)
+  for(j=0;j<Nx;++j)
+  {
+    if(fabs(A[i][j]-B[i][j])>max_diff)
+      max_diff=fabs(A[i][j]-B[i][j]);
+  }
+  return max_diff;
+}
+
+static void max_diff_calc(
+    config* c,
+    fields* f,
+    vol* vl)
+{
+  int Nx = c->Nx;
+  int My = c->My;
+  vl->Omega_tol = field_max_difference(Nx,My,f->Omega,f->Omega0);
+  vl->Psi_tol = field_max_difference(Nx,My,f->Psi,f->Psi0);
+}
+
+void one_time_step(
+    config* c,
+    space* s,
+    fields* f,
+    derived* d,
+    vol* v)
+{
+  omega_calc(c,f,d);
+  psi_calc(c,f,d,v);
+  set_boundaries(c,s,v->time,f,d);
+  velocity_calc(c,f,d);
+  max_diff_calc(c,f,v);
+}
+
+void calculate(
+    config* c,
+    space* s,
+    fields* f,
+    derived* d,
+    vol* v)
+{
+  int Nx = c->Nx;
+  int My = c->My;
+  int i;
+  field Psi0i = f->Psi0i;
+  field Psi0 = f->Psi0;
+  field Psi = f->Psi;
+  for (; v->step < c->Ot; ++(v->step))
+  {
+
+    for(i=1; i<My+1; ++i) {
+      Psi0i[i][0]=Psi0[i][0]=Psi[i][0];
+      Psi0i[i][Nx+1]=Psi0[i][0]=Psi[i][Nx+1];
+    }
+
+    memcpy(Psi0i[0],Psi[0],(Nx+2)*sizeof(double));
+    memcpy(Psi0i[My+1],Psi[My+1],(Nx+2)*sizeof(double));
+    memcpy(Psi0[0],Psi[0],(Nx+2)*sizeof(double));
+    memcpy(Psi0[My+1],Psi[My+1],(Nx+2)*sizeof(double));
+
+    swap_fields(&(f->Omega),&(f->Omega0));
+    one_time_step(c,s,f,d,v);
+    v->time += c->dt;
   }
 }
