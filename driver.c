@@ -61,8 +61,9 @@ void initState(state* s)
 {
   makeFields(s->f,s->c->Nx,s->c->My);
   initSpace(s->c,s->sp);
-  initFields(s->c,s->sp,s->dr,s->f);
   initDerived(s->c,s->sp,s->dr);
+  initVolatile(s->c,0,s->v);
+  initFields(s->c,s->sp,s->dr,s->f);
 }
 
 int main(int argc, char** argv)

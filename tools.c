@@ -39,26 +39,26 @@ double max(double a, double b)
 }
 
 #ifdef PARALLEL
-void start_parallel(void)
+void startParallel(void)
 {
   MPI_Init(NULL,NULL);
 }
 
-int parallel_rank(void)
+int parallelRank(void)
 {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
   return rank;
 }
 
-int parallel_size(void)
+int parallelSize(void)
 {
   int size;
   MPI_Comm_size(MPI_COMM_WORLD,&size);
   return size;
 }
 
-void stop_parallel(void)
+void stopParallel(void)
 {
   MPI_Finalize();
 }

@@ -1,6 +1,7 @@
 #include "field.h"
 #include "tools.h"
 #include <math.h>
+#include <assert.h>
 
 field makeField(int x, int y, int size)
 {
@@ -24,6 +25,17 @@ void freeField(field f)
 {
   deallocate(f[0]);
   deallocate(f);
+}
+
+void testFieldSanity(field f, int My,int Nx)
+{
+  int i,j;
+  for(i=0;i<My+2;++i)
+  for(j=0;j<Nx+2;++j)
+  {
+     assert((f[i][j]>0 || f[i][j]<0 || f[i][j]==0)&&
+    f[i][j]!=INFINITY && f[i][j]!=-INFINITY);
+  }
 }
 
 void makeFields(fields* f, int x, int y)

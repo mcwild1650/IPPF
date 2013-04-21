@@ -28,6 +28,7 @@ typedef struct {
 } vol;
 
 void initDerived(config* c, space* s, derived* d);
+void initVolatile(config* c, int k, vol* v);
 void initFields(config* c, space* s, derived* d, fields* f);
 void oneTimeStep(
     config* c,
