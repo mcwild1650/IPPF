@@ -9,7 +9,7 @@ SRC=config.c calc.c driver.c field.c restart.c space.c tools.c
 ippf: $(SRC) $(HEADERS)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o ippf
 
-serial:
+serial: ParabolaFlow_v3_2.c
 	$(CC) $(CFLAGS) ParabolaFlow_v3_2.c $(LDFLAGS) -o serial
 
 clean:

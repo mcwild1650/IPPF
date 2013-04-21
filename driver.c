@@ -66,9 +66,9 @@ void init_state(state* s)
 {
   make_fields(s->f,s->c->Nx,s->c->My);
   init_space(s->c,s->sp);
-  init_fields(s->c,s->sp,s->dr,s->f);
-  init_derived(s->c,s->sp,s->dr);
   init_volatile(s->c,0,s->v);
+  init_derived(s->c,s->sp,s->dr);
+  init_fields(s->c,s->sp,s->dr,s->f);
 }
 
 int main(int argc, char** argv)
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     read_config(a.configfile,c);
     init_state(&s);
     calculate(s.c,s.sp,s.f,s.dr,s.v);
-  //write_old_restart(s.c,s.sp,s.f,s.dr,s.v);
+    write_old_restart(s.c,s.sp,s.f,s.dr,s.v);
   }
   else if (a.m == restart_mode)
   {

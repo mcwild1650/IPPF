@@ -287,8 +287,8 @@ static double field_max_difference(int Nx,int My,field A, field B)
 {
   int i,j;
   double max_diff=0;
-  for(i=1;i<=My;++i)
-  for(j=1;j<=Nx;++j)
+  for(i=0;i<My+2;++i)
+  for(j=0;j<Nx+2;++j)
   {
     if(fabs(A[i][j]-B[i][j])>max_diff)
       max_diff=fabs(A[i][j]-B[i][j]);

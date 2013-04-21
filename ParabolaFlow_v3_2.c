@@ -766,6 +766,7 @@ int writeFile(double** Omega, double** Psi, double** u,double** v, int* OutIN,
 
   for(j=0; j<Nx+2; ++j)
     fprintf(f_out,"%30.13le",OutDP[j]);
+  fprintf(f_out,"\n");
 
   fclose(f_out);
   return 0;
