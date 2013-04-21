@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wfatal-errors
+CFLAGS=-Wall -Wfatal-errors -g
 LDFLAGS=-lm
 
 all: ippf serial

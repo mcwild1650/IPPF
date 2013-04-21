@@ -2,12 +2,12 @@
 #include "tools.h"
 #include <math.h>
 
-field make_field(int x, int y, int size)
+field make_field(int x, int y)
 {
   int i;
   field f;
   ALLOCATE(f,y);
-  ALLOCATE(f[0],size);
+  ALLOCATE(f[0],x*y);
   for (i=1; i < y; ++i)
     f[i] = f[i-1] + x;
   return f;
@@ -22,7 +22,7 @@ void swap_fields(field* a, field* b)
 
 void free_field(field f)
 {
-  deallocate(f[0]);
+  if (f) deallocate(f[0]);
   deallocate(f);
 }
 
@@ -30,18 +30,15 @@ void make_fields(fields* f, int x, int y)
 {
   int x2 = x+2;
   int y2 = y+2;
-  f->x=x;
-  f->y=y;
-  f->size=x*y;
-  f->Omega = make_field(x2,y2,f->size);
-  f->Omega0 = make_field(x2,y2,f->size);
-  f->Psi = make_field(x2,y2,f->size);
-  f->Psi0 = make_field(x2,y2,f->size);
-  f->Psi0i = make_field(x2,y2,f->size);
-  f->u = make_field(x2,y2,f->size);
-  f->v = make_field(x2,y2,f->size);
-  f->DM = make_field(x2,y2,f->size);
-  f->DMsq = make_field(x2,y2,f->size);
+  f->Omega = make_field(x2,y2);
+  f->Omega0 = make_field(x2,y2);
+  f->Psi = make_field(x2,y2);
+  f->Psi0 = make_field(x2,y2);
+  f->Psi0i = make_field(x2,y2);
+  f->u = make_field(x2,y2);
+  f->v = make_field(x2,y2);
+  f->DM = make_field(x2,y2);
+  f->DMsq = make_field(x2,y2);
 }
 
 void free_fields(fields* f)

@@ -4,6 +4,7 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 void die(const char* message)
 {
@@ -36,6 +37,11 @@ double max(double a, double b)
 {
   if (b>a) return b;
   return a;
+}
+
+void zero_out(void* p, size_t s)
+{
+  memset(p,0,s);
 }
 
 #ifdef PARALLEL

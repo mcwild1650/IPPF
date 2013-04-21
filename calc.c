@@ -7,6 +7,20 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+static void copy_boundaries(int Nx, int My, field a, field b)
+{
+  int i,j;
+  for (i=1;i<=My;++i) {
+    b[i][0]=a[i][0];
+    b[i][Nx+1]=a[i][Nx+1];
+  }
+  for (j=1;j<=Nx;++j) {
+    b[0][j]=a[0][j];
+    b[My+1][j]=a[My+1][j];
+  }
+}
 
 static int set_boundaries(
     config* c,
@@ -37,7 +51,6 @@ static int set_boundaries(
   const double amewa=(ia*((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dy2 = d->dy2;
-
   // Upper and Lower BCs
   for(j=0; j<Nx+2; ++j) {
     Psi[0][j]=0;
@@ -112,7 +125,7 @@ static double one_psi_calc(
     config* c,
     fields* f,
     field Psi,
-    field Psi0i,
+    field Psi0,
     derived* d)
 {
   int Nx = c->Nx;
@@ -130,13 +143,14 @@ static double one_psi_calc(
         KappaA*
 //todo: build a matrix of these:
          (dxsq*Omega[i][j]*DMsq[i][j]+
-          Psi0i[i][j+1]+
-          Psi0i[i][j-1]+
-          Kappasq*(Psi0i[i+1][j]+
-                   Psi0i[i-1][j]));
-      if(fabs(Psi[i][j]-Psi0i[i][j])>Psi_tol)
-        Psi_tol=fabs((Psi)[i][j]-(Psi0i)[i][j]);
+          Psi0[i][j+1]+
+          Psi0[i][j-1]+
+          Kappasq*(Psi0[i+1][j]+
+                   Psi0[i-1][j]));
+      if(fabs(Psi[i][j]-Psi0[i][j])>Psi_tol)
+        Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);
     }
+  copy_boundaries(Nx,My,Psi0,Psi);
   return Psi_tol;
 }
 
@@ -187,6 +201,7 @@ static void omega_calc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
+  copy_boundaries(Nx,My,Omega0,Omega);
 }
 
 void init_derived(config* c, space* s, derived* d)
@@ -236,10 +251,10 @@ void init_volatile(
 void init_fields(config* c, space* s, derived* d, fields* f)
 {
   int i,j;
-  int My = f->y;
-  int Nx = f->x;
+  int Nx = c->Nx;
+  int My = c->My;
   field u = f->u;
-  field v = f->u;
+  field v = f->v;
   field DM = f->DM;
   field DM2 = f->DMsq;
   field Psi = f->Psi;
@@ -272,8 +287,8 @@ static double field_max_difference(int Nx,int My,field A, field B)
 {
   int i,j;
   double max_diff=0;
-  for(i=0;i<My;++i)
-  for(j=0;j<Nx;++j)
+  for(i=1;i<=My;++i)
+  for(j=1;j<=Nx;++j)
   {
     if(fabs(A[i][j]-B[i][j])>max_diff)
       max_diff=fabs(A[i][j]-B[i][j]);
@@ -313,25 +328,9 @@ void calculate(
     derived* d,
     vol* v)
 {
-  int Nx = c->Nx;
-  int My = c->My;
-  int i;
-  field Psi0i = f->Psi0i;
-  field Psi0 = f->Psi0;
-  field Psi = f->Psi;
   for (; v->step < c->Ot; ++(v->step))
   {
-
-    for(i=1; i<My+1; ++i) {
-      Psi0i[i][0]=Psi0[i][0]=Psi[i][0];
-      Psi0i[i][Nx+1]=Psi0[i][0]=Psi[i][Nx+1];
-    }
-
-    memcpy(Psi0i[0],Psi[0],(Nx+2)*sizeof(double));
-    memcpy(Psi0i[My+1],Psi[My+1],(Nx+2)*sizeof(double));
-    memcpy(Psi0[0],Psi[0],(Nx+2)*sizeof(double));
-    memcpy(Psi0[My+1],Psi[My+1],(Nx+2)*sizeof(double));
-
+    swap_fields(&(f->Psi),&(f->Psi0));
     swap_fields(&(f->Omega),&(f->Omega0));
     one_time_step(c,s,f,d,v);
     v->time += c->dt;
