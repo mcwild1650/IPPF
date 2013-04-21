@@ -8,10 +8,10 @@ void* allocate(size_t bytes);
 #define ALLOCATE(p,n) ((p)=allocate((n)*sizeof(*(p))))
 void deallocate(void* memory);
 
-void start_parallel(void);
-int parallel_rank(void);
-int parallel_size(void);
-void stop_parallel(void);
+void startParallel(void);
+int parallelRan(void);
+int parallelSize(void);
+void stopParallel(void);
 void broadcast(void* p, size_t s);
 #define BROADCAST(o) broadcast(&(o),sizeof(o))
 

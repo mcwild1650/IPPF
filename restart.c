@@ -57,7 +57,7 @@ static int writeFile(
 }
 
 
-void write_old_restart(
+void writeOldRestart(
     config* c,
     space* s,
     fields* f,

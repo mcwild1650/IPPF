@@ -6,9 +6,9 @@
 
 typedef double** field;
 
-field make_field(int x, int y, int total);
-void swap_fields(field* a, field* b);
-void free_field(field f);
+field makeField(int x, int y, int total);
+void swapFields(field* a, field* b);
+void freeField(field f);
 
 typedef struct {
   int x;
@@ -25,7 +25,7 @@ typedef struct {
   field DMsq;
 } fields;
 
-void make_fields(fields* f, int x, int y);
-void free_fields(fields* f);
+void makeFields(fields* f, int x, int y);
+void freeFields(fields* f);
 
 #endif

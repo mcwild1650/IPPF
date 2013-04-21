@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int set_boundaries(
+static int setBoundaries(
     config* c,
     space* s,
     double t,
@@ -86,7 +86,7 @@ static int set_boundaries(
   return 0;
 }
 
-static void velocity_calc(
+static void velocityCalc(
     config* c,
     fields* f,
     derived* d)
@@ -108,7 +108,7 @@ static void velocity_calc(
   }
 }
 
-static double one_psi_calc(
+static double onePsiCalc(
     config* c,
     fields* f,
     field Psi,
@@ -140,7 +140,7 @@ static double one_psi_calc(
   return Psi_tol;
 }
 
-static void psi_calc(
+static void psiCalc(
     config* c,
     fields* f,
     derived* d,
@@ -148,18 +148,18 @@ static void psi_calc(
 {
   int Psi_k;
   double Tol = c->Tol;
-  double Psi_tol = one_psi_calc(c,f,f->Psi,f->Psi0,d);
+  double Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0,d);
   Psi_k = 1;
   while (Psi_tol > Tol) {
-     swap_fields(&(f->Psi),&(f->Psi0i));
-     Psi_tol = one_psi_calc(c,f,f->Psi,f->Psi0i,d);
+     swapFields(&(f->Psi),&(f->Psi0i));
+     Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0i,d);
      ++(Psi_k);
   }
   vl->Psi_k=Psi_k;
   vl->Psi_tol=Psi_tol;
 }
 
-static void omega_calc(
+static void omegaCalc(
     config* c,
     fields* f,
     derived* d)
@@ -189,7 +189,7 @@ static void omega_calc(
   }
 }
 
-void init_derived(config* c, space* s, derived* d)
+void initDerived(config* c, space* s, derived* d)
 {
   double dx = s->dx;
   double dy = s->dy;
@@ -224,7 +224,7 @@ void init_derived(config* c, space* s, derived* d)
   d->alphaY = alphaY;
 }
 
-void init_volatile(
+void initVolatile(
     config* c,
     int k,
     vol* v)
@@ -233,13 +233,13 @@ void init_volatile(
   v->time = k*(c->dt);
 }
 
-void init_fields(config* c, space* s, derived* d, fields* f)
+void initFields(config* c, space* s, derived* d, fields* f)
 {
   int i,j;
   int My = f->y;
   int Nx = f->x;
   field u = f->u;
-  field v = f->u;
+  field v = f->v;
   field DM = f->DM;
   field DM2 = f->DMsq;
   field Psi = f->Psi;
@@ -268,7 +268,7 @@ void init_fields(config* c, space* s, derived* d, fields* f)
   }
 }
 
-static double field_max_difference(int Nx,int My,field A, field B)
+static double fieldMaxDifference(int Nx,int My,field A, field B)
 {
   int i,j;
   double max_diff=0;
@@ -281,29 +281,29 @@ static double field_max_difference(int Nx,int My,field A, field B)
   return max_diff;
 }
 
-static void max_diff_calc(
+static void maxDiffCalc(
     config* c,
     fields* f,
     vol* vl)
 {
   int Nx = c->Nx;
   int My = c->My;
-  vl->Omega_tol = field_max_difference(Nx,My,f->Omega,f->Omega0);
-  vl->Psi_tol = field_max_difference(Nx,My,f->Psi,f->Psi0);
+  vl->Omega_tol = fieldMaxDifference(Nx,My,f->Omega,f->Omega0);
+  vl->Psi_tol = fieldMaxDifference(Nx,My,f->Psi,f->Psi0);
 }
 
-void one_time_step(
+void oneTimeStep(
     config* c,
     space* s,
     fields* f,
     derived* d,
     vol* v)
 {
-  omega_calc(c,f,d);
-  psi_calc(c,f,d,v);
-  set_boundaries(c,s,v->time,f,d);
-  velocity_calc(c,f,d);
-  max_diff_calc(c,f,v);
+  omegaCalc(c,f,d);
+  psiCalc(c,f,d,v);
+  setBoundaries(c,s,v->time,f,d);
+  velocityCalc(c,f,d);
+  maxDiffCalc(c,f,v);
 }
 
 void calculate(
@@ -332,8 +332,8 @@ void calculate(
     memcpy(Psi0[0],Psi[0],(Nx+2)*sizeof(double));
     memcpy(Psi0[My+1],Psi[My+1],(Nx+2)*sizeof(double));
 
-    swap_fields(&(f->Omega),&(f->Omega0));
-    one_time_step(c,s,f,d,v);
+    swapFields(&(f->Omega),&(f->Omega0));
+    oneTimeStep(c,s,f,d,v);
     v->time += c->dt;
   }
 }

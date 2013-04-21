@@ -2,7 +2,7 @@
 #include "tools.h"
 #include <math.h>
 
-field make_field(int x, int y, int size)
+field makeField(int x, int y, int size)
 {
   int i;
   field f;
@@ -13,47 +13,47 @@ field make_field(int x, int y, int size)
   return f;
 }
 
-void swap_fields(field* a, field* b)
+void swapFields(field* a, field* b)
 {
   field temp = *a;
   *a = *b;
   *b = temp;
 }
 
-void free_field(field f)
+void freeField(field f)
 {
   deallocate(f[0]);
   deallocate(f);
 }
 
-void make_fields(fields* f, int x, int y)
+void makeFields(fields* f, int x, int y)
 {
   int x2 = x+2;
   int y2 = y+2;
   f->x=x;
   f->y=y;
-  f->size=x*y;
-  f->Omega = make_field(x2,y2,f->size);
-  f->Omega0 = make_field(x2,y2,f->size);
-  f->Psi = make_field(x2,y2,f->size);
-  f->Psi0 = make_field(x2,y2,f->size);
-  f->Psi0i = make_field(x2,y2,f->size);
-  f->u = make_field(x2,y2,f->size);
-  f->v = make_field(x2,y2,f->size);
-  f->DM = make_field(x2,y2,f->size);
-  f->DMsq = make_field(x2,y2,f->size);
+  f->size=x2*y2;
+  f->Omega = makeField(x2,y2,f->size);
+  f->Omega0 = makeField(x2,y2,f->size);
+  f->Psi = makeField(x2,y2,f->size);
+  f->Psi0 = makeField(x2,y2,f->size);
+  f->Psi0i = makeField(x2,y2,f->size);
+  f->u = makeField(x2,y2,f->size);
+  f->v = makeField(x2,y2,f->size);
+  f->DM = makeField(x2,y2,f->size);
+  f->DMsq = makeField(x2,y2,f->size);
 }
 
-void free_fields(fields* f)
+void freeFields(fields* f)
 {
-  free_field(f->Omega);
-  free_field(f->Omega0);
-  free_field(f->Psi);
-  free_field(f->Psi0);
-  free_field(f->Psi0i);
-  free_field(f->u);
-  free_field(f->v);
-  free_field(f->DM);
-  free_field(f->DMsq);
+  freeField(f->Omega);
+  freeField(f->Omega0);
+  freeField(f->Psi);
+  freeField(f->Psi0);
+  freeField(f->Psi0i);
+  freeField(f->u);
+  freeField(f->v);
+  freeField(f->DM);
+  freeField(f->DMsq);
 }
 

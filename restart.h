@@ -5,8 +5,8 @@
 #include "calc.h"
 #include "space.h"
 
-void read_restart(const char* filename, config* c, fields* f);
-void write_old_restart(
+void readRestart(const char* filename, config* c, fields* f);
+void writeOldRestart(
     config* c,
     space* s,
     fields* f,

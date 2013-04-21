@@ -11,7 +11,7 @@ static void linspace(const double min, const double max, const int N,
     x[i]=min+(*dx)*i;
 }
 
-void init_space(config* c, space* s)
+void initSpace(config* c, space* s)
 {
   int Xmin = c->Xmin;
   int Xmax = c->Xmax;
@@ -32,7 +32,7 @@ void init_space(config* c, space* s)
   s->dy = dy;
 }
 
-void free_space(space* s)
+void freeSpace(space* s)
 {
   deallocate(s->x);
 }

@@ -10,6 +10,6 @@ typedef struct {
   int lasty;
 } grid;
 
-void compute_grid(int x, int y, int p, grid* g);
+void computeGrid(int x, int y, int p, grid* g);
 
 #endif

@@ -2,7 +2,7 @@
 #include <mpi.h>
 #include <stdio.h>
 
-void ask_config(config* c)
+void askConfig(config* c)
 {
   printf("Nx= ");
   scanf("%d",&(c->Nx));
@@ -60,7 +60,7 @@ void ask_config(config* c)
   c->Ymax = 11;
 }
 
-void write_config(const char* filename, const config* c)
+void writeConfig(const char* filename, const config* c)
 {
   FILE* file = fopen(filename,"w");
   fprintf(file,"Nx %d\n",c->Nx);
@@ -82,7 +82,7 @@ void write_config(const char* filename, const config* c)
   fclose(file);
 }
 
-void read_config(const char* filename, config* c)
+void readConfig(const char* filename, config* c)
 {
   FILE* file = fopen(filename,"r");
   fscanf(file,"Nx %d\n",&(c->Nx));

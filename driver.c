@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-int get_args(int argc, char** argv, args* a)
+int getArgs(int argc, char** argv, args* a)
 {
   if (argc == 2)
   {
@@ -37,7 +37,7 @@ int get_args(int argc, char** argv, args* a)
   return 0;
 }
 
-void make_state(state* s)
+void makeState(state* s)
 {
   ALLOCATE(s->f,1);
   ALLOCATE(s->sp,1);
@@ -46,51 +46,51 @@ void make_state(state* s)
   ALLOCATE(s->v,1);
 }
 
-void free_state(state* s)
+void freeState(state* s)
 {
-  free_fields(s->f);
+  freeFields(s->f);
   deallocate(s->f);
-  free_space(s->sp);
+  freeSpace(s->sp);
   deallocate(s->sp);
   deallocate(s->c);
   deallocate(s->dr);
   deallocate(s->v);
 }
 
-void init_state(state* s)
+void initState(state* s)
 {
-  make_fields(s->f,s->c->Nx,s->c->My);
-  init_space(s->c,s->sp);
-  init_fields(s->c,s->sp,s->dr,s->f);
-  init_derived(s->c,s->sp,s->dr);
+  makeFields(s->f,s->c->Nx,s->c->My);
+  initSpace(s->c,s->sp);
+  initFields(s->c,s->sp,s->dr,s->f);
+  initDerived(s->c,s->sp,s->dr);
 }
 
 int main(int argc, char** argv)
 {
   args a;
-  if (!get_args(argc,argv,&a))
+  if (!getArgs(argc,argv,&a))
     return 0;
   state s;
-  make_state(&s);
+  makeState(&s);
   config* c = s.c;
   if (a.m == config_mode)
   {
-    ask_config(c);
+    askConfig(c);
     printf("What would you like to call the configuration file?\n");
     scanf("%s",a.configfile);
-    write_config(a.configfile,c);
+    writeConfig(a.configfile,c);
   }
   else if (a.m == run_mode)
   {
-    read_config(a.configfile,c);
-    init_state(&s);
+    readConfig(a.configfile,c);
+    initState(&s);
     calculate(s.c,s.sp,s.f,s.dr,s.v);
-    write_old_restart(s.c,s.sp,s.f,s.dr,s.v);
+    writeOldRestart(s.c,s.sp,s.f,s.dr,s.v);
+    freeState(&s);
   }
   else if (a.m == restart_mode)
   {
-    read_config(a.configfile,c);
+    readConfig(a.configfile,c);
   }
-  free_state(&s);
   return 0;
 }

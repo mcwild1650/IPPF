@@ -9,7 +9,7 @@ typedef struct{
   double* y;
 } space;
 
-void init_space(config* c, space* s);
-void free_space(space* s);
+void initSpace(config* c, space* s);
+void freeSpace(space* s);
 
 #endif

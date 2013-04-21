@@ -27,9 +27,9 @@ typedef struct {
   double Ymin,Ymax;
 } config;
 
-void ask_config(config* c);
-void write_config(const char* filename, const config* c);
-void read_config(const char* filename, config* c);
-void broadcast_config(config* c);
+void askConfig(config* c);
+void writeConfig(const char* filename, const config* c);
+void readConfig(const char* filename, config* c);
+void broadcastConfig(config* c);
 
 #endif

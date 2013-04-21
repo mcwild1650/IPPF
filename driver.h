@@ -26,8 +26,8 @@ typedef struct {
   char configfile[FILENAME_LENGTH];
 } args;
 
-void make_state(state* s);
-void free_state(state* s);
-int get_args(int argc, char** argv, args* a);
+void makeState(state* s);
+void freeState(state* s);
+int getArgs(int argc, char** argv, args* a);
 
 #endif

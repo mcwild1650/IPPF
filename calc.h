@@ -27,9 +27,9 @@ typedef struct {
   double Psi_tol;
 } vol;
 
-void init_derived(config* c, space* s, derived* d);
-void init_fields(config* c, space* s, derived* d, fields* f);
-void one_time_step(
+void initDerived(config* c, space* s, derived* d);
+void initFields(config* c, space* s, derived* d, fields* f);
+void oneTimeStep(
     config* c,
     space* s,
     fields* f,
