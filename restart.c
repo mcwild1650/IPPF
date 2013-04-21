@@ -51,6 +51,7 @@ static int writeFile(
 
   for(j=0; j<Nx+2; ++j)
     fprintf(f_out,"%30.13le",OutDP[j]);
+  fprintf(f_out,"\n");
 
   fclose(f_out);
   return 0;
@@ -75,7 +76,7 @@ void writeOldRestart(
   }
   OutIN[0]=c->Nx+2;
   OutIN[1]=c->My+2;
-  OutIN[2]=vl->time;
+  OutIN[2]=vl->step;
 
   OutIN[4]=c->IBL;
   OutIN[5]=c->jet.ia;

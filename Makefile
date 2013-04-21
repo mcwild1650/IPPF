@@ -1,4 +1,3 @@
-CC=mpicc
 CFLAGS=-Wall -Wfatal-errors
 LDFLAGS=-lm
 HEADERS=config.h calc.h driver.h field.h restart.h space.h tools.h
@@ -12,7 +11,7 @@ debug: all
 ippf: $(SRC) $(HEADERS)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o ippf
 
-serial:
+serial: ParabolaFlow_v3_2.c
 	$(CC) $(CFLAGS) ParabolaFlow_v3_2.c $(LDFLAGS) -o serial
 
 clean:

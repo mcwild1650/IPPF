@@ -6,14 +6,11 @@
 
 typedef double** field;
 
-field makeField(int x, int y, int total);
+field makeField(int x, int y);
 void swapFields(field* a, field* b);
 void freeField(field f);
 
 typedef struct {
-  int x;
-  int y;
-  int size;
   field Omega;
   field Omega0;
   field Psi;

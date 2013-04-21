@@ -40,10 +40,15 @@ int getArgs(int argc, char** argv, args* a)
 void makeState(state* s)
 {
   ALLOCATE(s->f,1);
+  ZERO_OUT(*(s->f));
   ALLOCATE(s->sp,1);
+  ZERO_OUT(*(s->sp));
   ALLOCATE(s->c,1);
+  ZERO_OUT(*(s->c));
   ALLOCATE(s->dr,1);
+  ZERO_OUT(*(s->dr));
   ALLOCATE(s->v,1);
+  ZERO_OUT(*(s->v));
 }
 
 void freeState(state* s)
@@ -61,8 +66,8 @@ void initState(state* s)
 {
   makeFields(s->f,s->c->Nx,s->c->My);
   initSpace(s->c,s->sp);
-  initDerived(s->c,s->sp,s->dr);
   initVolatile(s->c,0,s->v);
+  initDerived(s->c,s->sp,s->dr);
   initFields(s->c,s->sp,s->dr,s->f);
 }
 

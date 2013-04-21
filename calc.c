@@ -7,6 +7,20 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+static void copy_boundaries(int Nx, int My, field a, field b)
+{
+  int i,j;
+  for (i=1;i<=My;++i) {
+    b[i][0]=a[i][0];
+    b[i][Nx+1]=a[i][Nx+1];
+  }
+  for (j=1;j<=Nx;++j) {
+    b[0][j]=a[0][j];
+    b[My+1][j]=a[My+1][j];
+  }
+}
 
 static int setBoundaries(
     config* c,
@@ -37,7 +51,6 @@ static int setBoundaries(
   const double amewa=(ia*((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dy2 = d->dy2;
-
   // Upper and Lower BCs
   for(j=0; j<Nx+2; ++j) {
     Psi[0][j]=0;
@@ -112,7 +125,7 @@ static double onePsiCalc(
     config* c,
     fields* f,
     field Psi,
-    field Psi0i,
+    field Psi0,
     derived* d)
 {
   int Nx = c->Nx;
@@ -124,23 +137,20 @@ static double onePsiCalc(
   double dxsq = d->dxsq;
   double Psi_tol = 0;
   int i,j;
-  testFieldSanity(Omega,My,Nx);
-  testFieldSanity(Psi0i,My,Nx);
-  testFieldSanity(DMsq,My,Nx);
   for(i=1; i<My+1; ++i)
     for(j=1; j<Nx+1; ++j) {
       Psi[i][j]=
         KappaA*
 //todo: build a matrix of these:
          (dxsq*Omega[i][j]*DMsq[i][j]+
-          Psi0i[i][j+1]+
-          Psi0i[i][j-1]+
-          Kappasq*(Psi0i[i+1][j]+
-                   Psi0i[i-1][j]));
-      if(fabs(Psi[i][j]-Psi0i[i][j])>Psi_tol)
-        Psi_tol=fabs((Psi)[i][j]-(Psi0i)[i][j]);
+          Psi0[i][j+1]+
+          Psi0[i][j-1]+
+          Kappasq*(Psi0[i+1][j]+
+                   Psi0[i-1][j]));
+      if(fabs(Psi[i][j]-Psi0[i][j])>Psi_tol)
+        Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);
     }
-    testFieldSanity(Psi,My,Nx);
+  copy_boundaries(Nx,My,Psi0,Psi);
   return Psi_tol;
 }
 
@@ -183,12 +193,6 @@ static void omegaCalc(
   int My=c->My;
   int Nx=c->Nx;
 
-  testFieldSanity(Omega0,My,Nx);
-  testFieldSanity(DMsq,My,Nx);
-  testFieldSanity(DM,My,Nx);
-  testFieldSanity(u,My,Nx);
-  testFieldSanity(v,My,Nx);
-
   for(i=1;i<My+1;++i)
   for(j=1;j<Nx+1;++j)
   {
@@ -198,6 +202,7 @@ static void omegaCalc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
+  copy_boundaries(Nx,My,Omega0,Omega);
 }
 
 void initDerived(config* c, space* s, derived* d)
@@ -247,8 +252,8 @@ void initVolatile(
 void initFields(config* c, space* s, derived* d, fields* f)
 {
   int i,j;
-  int My = f->y;
-  int Nx = f->x;
+  int Nx = c->Nx;
+  int My = c->My;
   field u = f->u;
   field v = f->v;
   field DM = f->DM;
@@ -264,7 +269,6 @@ void initFields(config* c, space* s, derived* d, fields* f)
       DM2[i][j]=square(x[j])+square(y[i]);
       DM[i][j]=sqrt(DM2[i][j]);
     }
-  testFieldSanity(DM2,My,Nx);
   for(i=1; i<My+2; ++i)
     for(j=0; j<Nx+2; ++j) {
       v[i][j]=-(y[i]-1)/DM[i][j];
@@ -272,26 +276,20 @@ void initFields(config* c, space* s, derived* d, fields* f)
       Psi[i][j]=(x[j]+A)*(y[i]-1);
       Omega[i][j]=0;
     }
-  testFieldSanity(DM2,My,Nx);
-  testFieldSanity(Psi,My,Nx);
   for(j=0; j<Nx+2; ++j) {
     v[0][j]=-(y[0]-1)/DM[0][j];
     u[0][j]=0;
     Psi[0][j]=(x[j]+A)*(y[0]-1);
     Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
   }
-  testFieldSanity(u,My,Nx);
-  testFieldSanity(v,My,Nx);
-  testFieldSanity(Omega,My,Nx);
-  testFieldSanity(f->Omega,My,Nx);
 }
 
 static double fieldMaxDifference(int Nx,int My,field A, field B)
 {
   int i,j;
   double max_diff=0;
-  for(i=0;i<My;++i)
-  for(j=0;j<Nx;++j)
+  for(i=0;i<My+2;++i)
+  for(j=0;j<Nx+2;++j)
   {
     if(fabs(A[i][j]-B[i][j])>max_diff)
       max_diff=fabs(A[i][j]-B[i][j]);
@@ -331,29 +329,9 @@ void calculate(
     derived* d,
     vol* v)
 {
-  int Nx = c->Nx;
-  int My = c->My;
-  int i;
-  field Psi0i = f->Psi0i;
-  field Psi0 = f->Psi0;
-  field Psi = f->Psi;
-  testFieldSanity(Psi0,My,Nx);
-  testFieldSanity(f->Omega,My,Nx);
   for (; v->step < c->Ot; ++(v->step))
   {
-
-    for(i=1; i<My+1; ++i) {
-      Psi0i[i][0]=Psi0[i][0]=Psi[i][0];
-      Psi0i[i][Nx+1]=Psi0[i][0]=Psi[i][Nx+1];
-    }
-    testFieldSanity(f->Omega,My,Nx);
-
-    memcpy(Psi0i[0],Psi[0],(Nx+2)*sizeof(double));
-    memcpy(Psi0i[My+1],Psi[My+1],(Nx+2)*sizeof(double));
-    memcpy(Psi0[0],Psi[0],(Nx+2)*sizeof(double));
-    memcpy(Psi0[My+1],Psi[My+1],(Nx+2)*sizeof(double));
-
-    testFieldSanity(f->Omega,My,Nx);
+    swapFields(&(f->Psi),&(f->Psi0));
     swapFields(&(f->Omega),&(f->Omega0));
     oneTimeStep(c,s,f,d,v);
     v->time += c->dt;
