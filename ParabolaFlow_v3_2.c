@@ -493,7 +493,8 @@ int main() {
   int KPsi,tic1=0,tic2=0,ct=0;
   double OmTol,PsiTol,t;
   double** temp;
-  while(k++<Ot) {
+  while(k<Ot) {
+    k++;
     OmTol=PsiTol=0;
 
     for(i=1; i<My+1; ++i) {
