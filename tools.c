@@ -35,17 +35,6 @@ void deallocate(void* memory)
     free(memory);
 }
 
-double square(double x)
-{
-  return x*x;
-}
-
-double max(double a, double b)
-{
-  if (b>a) return b;
-  return a;
-}
-
 void zero_out(void* p, size_t s)
 {
   memset(p,0,s);

@@ -19,6 +19,8 @@ void zero_out(void* p, size_t s);
 #define ZERO_OUT(o) zero_out(&(o),sizeof(o))
 
 double square(double x);
-double max(double a, double b);
+#define SQUARE(x) ((x)*(x))
+#define MAX(a,b) (((b)>(a))?(b):(a))
+#define MIN(a,b) (((b)<(a))?(b):(a))
 
 #endif
