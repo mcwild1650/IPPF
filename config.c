@@ -1,5 +1,4 @@
 #include "config.h"
-#include <mpi.h>
 #include <stdio.h>
 
 void askConfig(config* c)
