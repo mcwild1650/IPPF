@@ -44,7 +44,7 @@
  *
  *  Double Precision Variables (OutDP)
  *    1.  Re  (Reynolds number)
- *    2.  Omtol  (Max change in omega per iteration)
+ *    2.  OmTol  (Max change in omega per iteration)
  *    3.  PsiTol  (Max change in psi per iteration)
  *    4.  dx  (Grid spacing in X)
  *    5.  dy  (Grid spacing in Y)
@@ -115,7 +115,7 @@ int main() {
 
   const double Xmin=-20, Xmax=20, Ymin=1, Ymax=11;
 
-  int Nx,My,Ot,report,IBL,psave,i,j,k,Omtol,ia,ib;
+  int Nx,My,Ot,report,IBL,psave,i,j,k,ia,ib;
 
   int *OutIN;
 
