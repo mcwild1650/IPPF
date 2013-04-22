@@ -48,7 +48,7 @@ static int setBoundaries(
   field v = fld->v;
   field DMsq = fld->DMsq;
   field DM = fld->DM;
-  const double amewa=(ia*((Nx+1)/2+1))*dx;
+  const double amewa=(ia-((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dy2 = d->dy2;
   // Upper and Lower BCs
