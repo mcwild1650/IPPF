@@ -491,7 +491,7 @@ int main() {
 
   // Begin Calculations for each time step, k
   int KPsi,tic1=0,tic2=0,ct=0;
-  double OmTol,PsiTol,t;
+  double OmTol=0,PsiTol=0,t;
   double** temp;
   while(k<Ot) {
     k++;
