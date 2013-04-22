@@ -8,6 +8,9 @@ all: ippf serial
 debug:CFLAGS+=-g -DDEBUG
 debug: all
 
+parallel:CFLAGS+= -DPARALLEL
+parallel:all
+
 ippf: $(SRC) $(HEADERS)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o ippf
 
