@@ -209,8 +209,8 @@ void initDerived(config* c, space* s, derived* d)
 {
   double dx = s->dx;
   double dy = s->dy;
-  double dxx = square(dx);
-  double dyy = square(dy);
+  double dxx = SQUARE(dx);
+  double dyy = SQUARE(dy);
   d->dxsq = dxx;
   d->dysq = dyy;
   double dx2 = 2*dx;
@@ -218,14 +218,14 @@ void initDerived(config* c, space* s, derived* d)
   d->dx2 = dx2;
   d->dy2 = dy2;
   double dt = c->dt;
-  double Kappa2 = square(dx/dy);
+  double Kappa2 = SQUARE(dx/dy);
   d->Kappasq = Kappa2;
   d->KappaA = 1/(2*(1.0+Kappa2));
   double Cx = dt/dx;
   double Cy = dt/dy;
   d->Cx = Cx;
   d->Cy = Cy;
-  double C = max(Cx,Cy);
+  double C = MAX(Cx,Cy);
   d->C = C;
   double Cx2 = 0.5*Cx;
   double Cy2 = 0.5*Cy;
@@ -266,7 +266,7 @@ void initFields(config* c, space* s, derived* d, fields* f)
   double dyy = d->dysq;
   for(i=0; i<My+2; ++i)
     for(j=0; j<Nx+2; ++j) {
-      DM2[i][j]=square(x[j])+square(y[i]);
+      DM2[i][j]=SQUARE(x[j])+SQUARE(y[i]);
       DM[i][j]=sqrt(DM2[i][j]);
     }
   for(i=1; i<My+2; ++i)
