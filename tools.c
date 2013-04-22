@@ -5,6 +5,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+#include <math.h>
+
+void testDoubleSanity(double n)
+{
+  assert((n>0 || n<0 || n==0) && n!=INFINITY && n!=-INFINITY);
+}
 
 void die(const char* message)
 {

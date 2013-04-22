@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+void testDoubleSanity(double n);
 void die(const char* message) __attribute__((noreturn));
 void* allocate(size_t bytes);
 #define ALLOCATE(p,n) ((p)=allocate((n)*sizeof(*(p))))

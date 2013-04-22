@@ -33,8 +33,7 @@ void testFieldSanity(field f, int My,int Nx)
   for(i=0;i<My+2;++i)
   for(j=0;j<Nx+2;++j)
   {
-     assert((f[i][j]>0 || f[i][j]<0 || f[i][j]==0)&&
-    f[i][j]!=INFINITY && f[i][j]!=-INFINITY);
+    testDoubleSanity(f[i][j]);
   }
 }
 
