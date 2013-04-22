@@ -19,3 +19,8 @@ serial: ParabolaFlow_v3_2.c
 
 clean:
 	rm -rf ippf serial
+
+test: ippf serial
+	./ippf run testconf.txt
+	./serial < testin.txt
+	diff good.dat out.dat
