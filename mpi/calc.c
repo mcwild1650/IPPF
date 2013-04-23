@@ -10,127 +10,87 @@
 #include <stdio.h>
 #include <mpi.h>
 
-static void copy_boundaries(int Nx, int My, field a, field b)
+int pxpy2rank(int px, int py, grid* g)
 {
-  int i,j;
-  for (i=1;i<=My;++i) {
-    b[i][0]=a[i][0];
-    b[i][Nx+1]=a[i][Nx+1];
-  }
-  for (j=1;j<=Nx;++j) {
-    b[0][j]=a[0][j];
-    b[My+1][j]=a[My+1][j];
-  }
+  int n= g->n, m= g->m;
+  if(px>n-1 || py >m-1 || px<0 || py<0) return -1;
+  else return px+py*n;
 }
 
-void mpi_copy_boundaries(int Nx, int My, field a, field b,config* c)
+void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
 {
-    	int px,py;  //position of the cell
-    	int i,j;
-    	px= c->mpi_para.px;
-    	py= c->mpi_para.py;
-    	
-    	int dest_px,dest_py,dest_rank;
-    	double *send_column1,*send_column_1,*rec_column1,*rec_column_1;
-    	MPI_Request request[12];
-    	
-    	ALLOCATE(send_column1,My);
-    	ALLOCATE(send_column_1,My);
-    	ALLOCATE(rec_column1,My);
-    	ALLOCATE(rec_column_1,My);
- 
-    	dest_rank=pxpy2rank(px+1,py);
-    	if(dest_rank!=-1)
-    	{
-    		for(i=1;i<=My;i++)
-    		{
-    			send_column1[i-1]=a[i][Nx];
-    		}
-    		MPI_Isend(send_column1,sizeof(send_column1),MPI_DOUBLE, dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[0]);
-    		MPI_Irecv(rec_column1,sizeof(rec_column1),MPI_DOUBLE,dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[1]);
-    	}
-    	else
-    	{
-    		for(i=1;i<=My;i++)
-    		{
-    			b[i][Nx+1]=a[i][Nx+1];
-    		}	
-    	}
-    	
-    	
-    	dest_rank=pxpy2rank(px-1,py);
-    	if(dest_rank!=-1)
-    	{
-    		for(i=1;i<=My;i++)
-    		{
-    			send_column_1[i-1]=a[i][1];
-    		}
-    		MPI_Isend(send_column1,sizeof(send_column_1),MPI_DOUBLE, dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[2]);
-    		MPI_Irecv(rec_column_1,sizeof(rec_column_1),MPI_DOUBLE,dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[3]);
-    	}
-    	else
-    	{
-    		for(i=1;i<=My;i++)
-    		{
-    			b[i][0]=a[i][0];
-    		}	
-    	}
-    	
-    	dest_rank=pxpy2rank(px,py+1);
-    	if(dest_rank!=-1)
-    	{
-    		MPI_Isend(&a[My][1],Nx,MPI_DOUBLE, dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[4]);
-    		MPI_Irecv(&b[My+1][1],Nx,MPI_DOUBLE,dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[5]);
-    	}
-    	else
-    	{
-    		for(i=1;i<=Nx;i++)
-    		{
-    			b[My+1][i]=a[My+1][i];
-    		}
-    	}
-    	
-    	dest_rank=pxpy2rank(px,py-1);
-    	if(dest_rank!=-1)
-    	{
-    		MPI_Isend(&a[1][1],Nx,MPI_DOUBLE, dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[4]);
-    		MPI_Irecv(&b[0][1],Nx,MPI_DOUBLE,dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[5]);
-    	}
-    	else
-    	{
-    		for(i=1;i<=Nx;i++)
-    		{
-    			b[0][i]=a[0][i];
-    		}
-    	}
-	
-    	dest_rank=pxpy2rank(px+1,py+1);
-    	if(dest_rank!=-1)
-    	{
-    		MPI_Isend(&a[My][My],1,MPI_DOUBLE, dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[4]);
-    		MPI_Irecv(&b[My+1][My+1],1,MPI_DOUBLE,dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[5]);
-    	}
-    	else b[My+1][My+1]=a[My+1][My+1];
-    	
-    	dest_rank=pxpy2rank(px-1,py-1);
-    	if(dest_rank!=-1)
-    	{
-    		MPI_Isend(&a[1][1],1,MPI_DOUBLE, dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[4]);
-    		MPI_Irecv(&b[0][0],1,MPI_DOUBLE,dest_rank,MPI_ANY_TAG,MPI_COMM_WORLD,&request[5]);
-    	}
-    	else b[0][0]=a[0][0];
-  
-  ////////////////////
- 
-}
+  int px,py;  //position of the cell
+  int i;
+  int dest_rank;
+  double *send_column1,*send_column_1,*rec_column1,*rec_column_1;
+  MPI_Request request[8];
+  px= g->px;
+  py= g->py;
 
-int pxpy2rank(int px,int py,config* c)
-{
-	int n= c->mpi_para.n,m= c->mpi_para.m;
-	int rank=px+px*n;
-	if(px>n-1 || py >m-1 || px<0 || py<0)	return -1;
-	else return rank;
-		 
+
+  ALLOCATE(send_column1,My);
+  ALLOCATE(send_column_1,My);
+  ALLOCATE(rec_column1,My);
+  ALLOCATE(rec_column_1,My);
+
+  dest_rank=pxpy2rank(px+1,py,g);
+  if(dest_rank!=-1)
+  {
+    for(i=1;i<=My;i++)
+    {
+      send_column1[i-1]=b[i][Nx];
+    }
+    MPI_Isend(send_column1,My,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[0]);
+    MPI_Irecv(rec_column1 ,My,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[1]);
+  }
+  else
+    for(i=1;i<=My;i++)
+      b[i][Nx+1]=a[i][Nx+1];
+
+  dest_rank=pxpy2rank(px-1,py,g);
+  if(dest_rank!=-1)
+  {
+    for(i=1;i<=My;i++)
+    {
+      send_column_1[i-1]=b[i][1];
+    }
+    MPI_Isend(send_column_1,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[2]);
+    MPI_Irecv(rec_column_1 ,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[3]);
+  }
+  else
+    for(i=1;i<=My;i++)
+      b[i][0]=a[i][0];
+
+  dest_rank=pxpy2rank(px,py+1,g);
+  if(dest_rank!=-1)
+  {
+    MPI_Isend(&b[My][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[4]);
+    MPI_Irecv(&b[0][1] ,Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[5]);
+  }
+  else
+    for(i=1;i<=Nx;i++)
+      b[My+1][i]=a[My+1][i];
+
+  dest_rank=pxpy2rank(px,py-1,g);
+  if(dest_rank!=-1)
+  {
+    MPI_Isend(&a[1][1]   ,Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[6]);
+    MPI_Irecv(&b[My+1][1],Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[7]);
+  }
+  else
+    for(i=1;i<=Nx;i++)
+      b[0][i]=a[0][i];
+  MPI_Waitall(8,request,MPI_STATUSES_IGNORE);
+
+  for(i=1;i<=My;i++)
+    b[i][0] = rec_column1[i-1];
+  for(i=1;i<=My;i++)
+    b[i][Nx+1] = rec_column_1[i-1];
+
+  deallocate(send_column_1);
+  deallocate(rec_column_1);
+  deallocate(send_column1);
+  deallocate(rec_column1);
 }
 
 static int setBoundaries(
@@ -237,7 +197,8 @@ static double onePsiCalc(
     fields* f,
     field Psi,
     field Psi0,
-    derived* d)
+    derived* d,
+    grid* g)
 {
   int Nx = c->Nx;
   int My = c->My;
@@ -259,9 +220,9 @@ static double onePsiCalc(
           Kappasq*(Psi0[i+1][j]+
                    Psi0[i-1][j]));
       if(fabs(Psi[i][j]-Psi0[i][j])>Psi_tol)
-        Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);  ////////////////////////// 
+        Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);
     }
-  mpi_copy_boundaries(Nx,My,Psi0,Psi,c);
+  mpi_copy_boundaries(Nx,My,Psi0,Psi,g);
   return Psi_tol;
 }
 
@@ -269,15 +230,16 @@ static void psiCalc(
     config* c,
     fields* f,
     derived* d,
-    vol* vl)
+    vol* vl,
+    grid* g)
 {
   int Psi_k;
   double Tol = c->Tol;
-  double Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0,d);
+  double Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0,d,g);
   Psi_k = 1;
   while (Psi_tol > Tol) {
      swapFields(&(f->Psi),&(f->Psi0i));
-     Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0i,d);
+     Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0i,d,g);
      ++(Psi_k);
   }
   vl->Psi_k=Psi_k;
@@ -287,7 +249,8 @@ static void psiCalc(
 static void omegaCalc(
     config* c,
     fields* f,
-    derived* d)
+    derived* d,
+    grid* g)
 {
   int i,j;
   field Omega=f->Omega;
@@ -313,7 +276,7 @@ static void omegaCalc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
-  mpi_copy_boundaries(Nx,My,Omega0,Omega,c);
+  mpi_copy_boundaries(Nx,My,Omega0,Omega,g);
 }
 
 
@@ -423,12 +386,13 @@ static void maxDiffCalc(
 void oneTimeStep(
     config* c,
     space* s,
+    grid* g,
     fields* f,
     derived* d,
     vol* v)
 {
-  omegaCalc(c,f,d);
-  psiCalc(c,f,d,v);
+  omegaCalc(c,f,d,g);
+  psiCalc(c,f,d,v,g);
   setBoundaries(c,s,v->time,f,d);
   velocityCalc(c,f,d);
   maxDiffCalc(c,f,v);
@@ -437,6 +401,7 @@ void oneTimeStep(
 void calculate(
     config* c,
     space* s,
+    grid* g,
     fields* f,
     derived* d,
     vol* v)
@@ -445,7 +410,7 @@ void calculate(
   {
     swapFields(&(f->Psi),&(f->Psi0));
     swapFields(&(f->Omega),&(f->Omega0));
-    oneTimeStep(c,s,f,d,v);
+    oneTimeStep(c,s,g,f,d,v);
     v->time += c->dt;
   }
 }

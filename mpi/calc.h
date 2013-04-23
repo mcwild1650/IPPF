@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "space.h"
+#include "grid.h"
 #include "field.h"
 
 #define PI 3.14159265358979
@@ -33,12 +34,14 @@ void initFields(config* c, space* s, derived* d, fields* f);
 void oneTimeStep(
     config* c,
     space* s,
+    grid* g,
     fields* f,
     derived* d,
     vol* v);
 void calculate(
     config* c,
     space* s,
+    grid* g,
     fields* f,
     derived* d,
     vol* v);

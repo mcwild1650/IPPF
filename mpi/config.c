@@ -62,8 +62,8 @@ void askConfig(config* c)
 void writeConfig(const char* filename, const config* c)
 {
   FILE* file = fopen(filename,"w");
-  fprintf(file,"Nx %d\n",c->tot_Nx);
-  fprintf(file,"My %d\n",c->tot_My);
+  fprintf(file,"Nx %d\n",c->Nx);
+  fprintf(file,"My %d\n",c->My);
   fprintf(file,"Reynolds Number %lf\n",c->Re);
   fprintf(file,"Circulation %lf\n",c->A);
   fprintf(file,"Timesteps %d\n",c->Ot);
@@ -84,8 +84,8 @@ void writeConfig(const char* filename, const config* c)
 void readConfig(const char* filename, config* c)
 {
   FILE* file = fopen(filename,"r");
-  fscanf(file,"Nx %d\n",&(c->tot_Nx));
-  fscanf(file,"My %d\n",&(c->tot_My));
+  fscanf(file,"Nx %d\n",&(c->Nx));
+  fscanf(file,"My %d\n",&(c->My));
   fscanf(file,"Reynolds Number %lf\n",&(c->Re));
   fscanf(file,"Circulation %lf\n",&(c->A));
   fscanf(file,"Timesteps %d\n",&(c->Ot));

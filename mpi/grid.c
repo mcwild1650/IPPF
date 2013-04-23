@@ -1,4 +1,5 @@
 #include "grid.h"
+#include "tools.h"
 #include <limits.h>
 #include <stdio.h>
 
@@ -12,47 +13,54 @@ static int ceildiv(int a, int b)
     return a/b;
 }
 
-void compute_grid(int x, int y, int p, grid* g)
+void partition(config* c, grid* g)
 {
-  int good_px = 0;
-  int good_py = 0;
+  int x = c->Nx;
+  int y = c->My;
+  int good_m = 0;
+  int good_n = 0;
   int min_comm = INT_MAX;
   int min_comp = INT_MAX;
+  int p = parallelSize();
   int maxx = MIN(p,x);
   int maxy = MIN(p,y);
-  for (int px=1; px <= maxx; ++px)
-  for (int py=1; py <= maxy; ++py)
-    if (px*py == p)
+  int m,n;
+  for (m=1; m <= maxy; ++m)
+  for (n=1; n <= maxx; ++n)
+    if (m*n == p)
     {
-      int dx = ceildiv(x,px);
-      int dy = ceildiv(y,py);
-      int comm=0;
+      int dx = ceildiv(x,n);
+      int dy = ceildiv(y,m);
+      int comm=(m-1)*x + (n-1)*y;
       int comp=dx*dy;
-      for (int c=dx; c < x; c += dx)
-        comm += y;
-      for (int r=dy; r < y; r += dy)
-        comm += x;
-    //if ((comm <= min_comm)&&
-    //    (comp <= min_comp))
-      if ((comp <= min_comp))
+      if ((comm <= min_comm)&&
+          (comp <= min_comp))
       {
         min_comm = comm;
         min_comp = comp;
-        good_px = px;
-        good_py = py;
+        good_n = n;
+        good_m = m;
       }
     }
-  if ((!good_px)&&(!good_py))
-  {
-    fprintf(stderr,"fail\n");
-    return;
-  }
-  printf("comm %d\n",min_comm);
-  printf("comp %d\n",min_comp);
-  g->px = good_px;
-  g->py = good_py;
-  g->dx = ceildiv(x,good_px);
-  g->dy = ceildiv(x,good_py);
-  g->lastx = x - (g->px-1) * g->dx;
-  g->lasty = y - (g->py-1) * g->dy;
+  if ((!good_m)||(!good_n))
+    die("failed to partition\n");
+  g->x = x;
+  g->y = y;
+  g->n = good_n;
+  g->m = good_m;
+  g->dx = ceildiv(x,good_n);
+  g->dy = ceildiv(y,good_m);
+  g->lastx = x -((g->n-1) * g->dx);
+  g->lasty = y -((g->m-1) * g->dy);
+  int rank = parallelRank();
+  g->py = rank/(g->n);
+  g->px = rank%(g->n);
+  if (g->py == g->m-1)
+    c->Nx = g->lastx;
+  else
+    c->Nx = g->dx;
+  if (g->px == g->n-1)
+    c->My = g->lasty;
+  else
+    c->My = g->dy;
 }

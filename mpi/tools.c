@@ -40,7 +40,7 @@ void zero_out(void* p, size_t s)
   memset(p,0,s);
 }
 
- #ifdef PARALLEL
+#ifdef PARALLEL
 void startParallel(void)
 {
   MPI_Init(NULL,NULL);
@@ -69,11 +69,5 @@ void broadcast(void* p, size_t s)
 {
   MPI_Bcast(p,s,MPI_BYTE,0,MPI_COMM_WORLD);
 }
-
- 
-
-
-
- #endif
-
+#endif
 
