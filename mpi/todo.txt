@@ -1,0 +1,31 @@
+1. boundary data exchange
+2. configuration file handling
+3. output file handling
+4. field computation
+  4.1 compute Omega
+  4.2 compute Psi
+  4.3 compute velocities
+5. synthetic jet handling
+6. field initialization
+7. mesh initialization (positions)
+
+File structure:
+  tools.h/tools.c : contains helper functions for allocating
+      memory, calling MPI, etc.
+  config.h/config.c : configuration file dialog
+      and reading a configuration file in parallel
+  grid.h/grid.c : given info from configuration, generates
+      the x and y values of the grid, the DM and DM2 fields,
+      and any other constant stuff that is needed.
+  field.h/field.c : handles partitioning, allocating,
+      and deallocating of a single-value field, given
+      the grid size. also handles updating shared
+      values in parallel.
+  flow.h/flow.c : uses the field functions to compute
+      omega, psi, and velocities, also handles boundary
+      condiditions
+  restart.h/restart.c : functions for printing out
+      restart files in parallel and reading them in parallel.
+  driver.h/driver.c : gets configuration info and
+      handles high-level actions: make fields, give
+      to flow functions, print restart files or not

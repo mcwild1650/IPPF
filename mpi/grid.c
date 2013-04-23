@@ -12,7 +12,7 @@ static int ceildiv(int a, int b)
     return a/b;
 }
 
-void computeGrid(int x, int y, int p, grid* g)
+void compute_grid(int x, int y, int p, grid* g)
 {
   int good_px = 0;
   int good_py = 0;
@@ -32,9 +32,9 @@ void computeGrid(int x, int y, int p, grid* g)
         comm += y;
       for (int r=dy; r < y; r += dy)
         comm += x;
-      printf("try %d %d: %d, %d\n",px,py,comm,comp);
-      if ((comm <= min_comm)&&
-          (comp <= min_comp))
+    //if ((comm <= min_comm)&&
+    //    (comp <= min_comp))
+      if ((comp <= min_comp))
       {
         min_comm = comm;
         min_comp = comp;

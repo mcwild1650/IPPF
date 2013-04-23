@@ -1,0 +1,100 @@
+\documentclass{article}
+\usepackage[margin=1.0in]{geometry}
+\title{Interactive Parallel Parabola Flow}
+\author{
+Micah Corah
+\and
+Dan Ibanez
+\and
+David McWilliams
+\and
+Han Wang
+}
+\begin{document}
+\maketitle
+
+This project consists of the parallelization of
+a finite difference fluid dynamics flow solver for a specialized
+avionic scenario.
+The simulation, which originated as a FORTRAN program and has since
+been rewritten in C, solves for the flow of air over the leading
+edge of an airfoil, and aims to detect certain conditions such
+as stall and how they are affected by synthetic jets and angles
+of attack.
+The problem is discretized using a structured rectangular grid
+that is ``wrapped" around the leading edge of the airfoil,
+which itself is approximated as a perfect parabola.
+We will produce an MPI-parallel version of this program,
+and may consider hybrid parallelism if time allows.
+The structure of the code suggests that good strong scaling
+should be possible.
+
+There are several fields discretized using the rectangular grid.
+Fields $u$ and $v$ are the fluid velocity.
+Fields $\Psi$ and $\Omega$ are the streamline and vorticity fields,
+respectively.
+The simulation currently runs for a fixed number of timesteps,
+and can write restart files at any timestep.
+Each timestep should be dominated by the computation of the $\Psi$
+and $\Omega$ fields.
+Both fields are computed using neighboring values from previous
+timesteps, which is a conveniently parallelizable algorithm.
+The $\Omega$ field is computed in one pass, and the $\Psi$ field
+is computed in an iterative fashion, by recomputing it using
+as many passes as necessary to reach some convergence tolerance.
+Velocity fields are derived from $\Psi$ and $\Omega$ in one pass,
+and the timestep concludes by resetting boundary conditions.
+
+To make this software parallel, there are several major changes to
+be made including file I/O, field partitioning, partition boundary
+synchronization, a few global reductions.
+
+Field partitioning should be explained first because it defines
+parallel behavior.
+The serial rectangular grid will be partitioned into sub-grids
+of equal dimensions.
+These sub-grids will each require information from other sub-grids
+during computation, and these overlapping partition boundaries
+will have to be synchronized.
+As a simple example, assume the grid is $100\times 100$.
+The serial code actually allocates a $102\times 102$ grid
+so that boundary conditions can be set.
+These can be viewed as the ranges $[0,100[\times[0,100[$
+and $[-1,101[\times [-1,101[$.
+Using 4 parallel processes, each process would be responsible for
+computing a $50\times 50$ sub-grid.
+Process 0 might compute the $[0,50[\times [0,50[$ range, but it
+would need to allocate and have good values for the
+$[-1,51[\times [-1,51[$ range.
+Another process may compute $[50,100[\times [50,100[$ range,
+but needs $[49,101[\times [49,101[$.
+The overlapping values would have to be communicated between timesteps
+for $\Omega$ and between iterations of convergence for $\Psi$.
+Determining the right partitions for uneven grid dimensions
+will be another challenge for us.
+
+File I/O can be broken into input and output.
+Currently the program presents a command-line dialog at startup
+to ask the user for configuration parameters.
+In parallel, we would like these parameters to be in a single
+configuration file, and this may be the rare case in which a single
+process should read the file and broadcast the small amount of data.
+We should still keep the helpful dialog interface, perhaps as a separate
+program which creates configuration files.
+The restart files are currently text-format serial files containing
+all field data.
+Since the global partitioning is known by all processes, we should
+be able to write a single file in parallel knowing the offset of
+each process.
+If this hits scaling issues we may go to process grouping approaches.
+
+We will first verify the output of the parallel version using the
+existing FORTRAN and C codes, including output generated in parallel,
+since the simulation is deterministic in parallel.
+For results, we would like to conduct strong and weak scaling studies
+of this code.
+One issue of concern is that the iterative calculation of $\Psi$ will
+probably converge slower as the grid gets bigger, so we will keep
+careful track of the number of iterations and study its behavior.
+
+\end{document}
