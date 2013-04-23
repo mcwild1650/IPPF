@@ -77,10 +77,8 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   }
   else
   {
-    printf("Copying field0[0][0]=%lf to field[0][0]\n",a[0][0]);
     for(i=0;i<Nx+2;i++)
       b[0][i]=a[0][i];
-    printf("field[0][0]=%lf\n",b[0][0]);
     request[4]=request[5]=MPI_REQUEST_NULL;
   }
 
@@ -244,11 +242,7 @@ static double onePsiCalc(
       if(fabs(Psi[i][j]-Psi0[i][j])>Psi_tol)
         Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);
     }
-  printf("before Psi copy Psi0[0][0]=%lf\nPsi0[1][0]=%lf\nPsi0[2][0]%lf\n",
-      Psi0[0][0],Psi0[1][0],Psi0[2][0]);
   mpi_copy_boundaries(Nx,My,Psi0,Psi,g);
-  printf("after Psi copy Psi[0][0]=%lf\nPsi[1][0]=%lf\nPsi[2][0]%lf\n",
-      Psi[0][0],Psi[1][0],Psi[2][0]);
   return Psi_tol;
 }
 
@@ -314,12 +308,10 @@ void initDerived(config* c, space* s, derived* d)
   double dyy = SQUARE(dy);
   d->dxsq = dxx;
   d->dysq = dyy;
-  printf("dysq=%lf\n",dyy);
   double dx2 = 2*dx;
   double dy2 = 2*dy;
   d->dx2 = dx2;
   d->dy2 = dy2;
-  printf("dy2=%lf\n",dy2);
   double dt = c->dt;
   double Kappa2 = SQUARE(dx/dy);
   d->Kappasq = Kappa2;
