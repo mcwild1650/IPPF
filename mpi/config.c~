@@ -62,8 +62,8 @@ void askConfig(config* c)
 void writeConfig(const char* filename, const config* c)
 {
   FILE* file = fopen(filename,"w");
-  fprintf(file,"Nx %d\n",c->tot_Nx);
-  fprintf(file,"My %d\n",c->tot_My);
+  fprintf(file,"Nx %d\n",c->total_Nx);
+  fprintf(file,"My %d\n",c->total_My);
   fprintf(file,"Reynolds Number %lf\n",c->Re);
   fprintf(file,"Circulation %lf\n",c->A);
   fprintf(file,"Timesteps %d\n",c->Ot);

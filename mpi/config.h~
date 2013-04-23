@@ -16,7 +16,6 @@ typedef struct {
  int my_x_start,my_x_end;
  int my_y_start,my_y_end;
  int m,n;  // totoal partition number in x and y direction
- int px,py;   //position of this cell 
 }  mpipara;
 
 typedef struct {

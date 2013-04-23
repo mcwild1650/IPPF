@@ -2,6 +2,7 @@ CFLAGS=-Wall -Wfatal-errors
 LDFLAGS=-lm
 HEADERS=config.h calc.h driver.h field.h restart.h space.h tools.h
 SRC=config.c calc.c driver.c field.c restart.c space.c tools.c
+CC=mpicc
 
 all: ippf serial
 

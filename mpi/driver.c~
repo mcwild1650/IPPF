@@ -141,13 +141,13 @@ void initMpi(state* s)
    total=0;
   for (i=0;i<m;i++)
   	{
-  		if(i==myrank/n)  s->c->mpi_para.my_y_start=total;
+  		if(i==myrank/m)  s->c->mpi_para.my_y_start=total;
   		if(i<(total_My+2)%m )
   			total+=(total_My+2)/m+1;
   		else
   			total+=(total_My+2)/m;
   			
-  		if(i==myrank/n) 
+  		if(i==myrank/m) 
   		{
   			s->c->mpi_para.my_y_end=total-1;
   			s->c->My=s->c->mpi_para.my_y_end-s->c->mpi_para.my_y_start+1;
@@ -155,10 +155,6 @@ void initMpi(state* s)
   		}
   	 	 
   	}
-  	s->c->mpi_para.m=m;
-  	s->c->mpi_para.n=n;
-  	s->c->mpi_para.px=myrank%n;
-  	s->c->mpi_para.py=myrank/n;
  printf ("Cha : %d %d \n", s->c->mpi_para.my_x_end ,total);
  printf("\nmy rank:%d,x: %d - %d ;  y: %d - %d",myrank,s->c->mpi_para.my_x_start,s->c->mpi_para.my_x_end,s->c->mpi_para.my_y_start,s->c->mpi_para.my_y_end);
  

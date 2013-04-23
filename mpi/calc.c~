@@ -313,7 +313,7 @@ static void omegaCalc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
-  mpi_copy_boundaries(Nx,My,Omega0,Omega,c);
+  mpi_copy_boundaries(Nx,My,Omega0,Omega);
 }
 
 

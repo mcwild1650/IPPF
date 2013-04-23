@@ -26,7 +26,12 @@ double square(double x);
 #define MAX(a,b) (((b)>(a))?(b):(a))
 #define MIN(a,b) (((b)<(a))?(b):(a))
 
-
+typedef struct {
+ int myrank;
+ int mpi_size;
+ int my_x_start,my_x_end;
+ int my_y_start,my_y_end;
+}  mpipara;
 
  
 #endif
