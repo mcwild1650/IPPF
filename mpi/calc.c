@@ -102,10 +102,12 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   MPI_Waitall(8,request,MPI_STATUSES_IGNORE);
 
   //copy the columns where they belong
-  for(i=1;i<=My;i++)
-    b[i][Nx+1] = rec_column1[i-1];
-  for(i=1;i<=My;i++)
-    b[i][0] = rec_column_1[i-1];
+  if (pxpy2rank(px+1,py,g) != -1)
+    for(i=1;i<=My;i++)
+      b[i][Nx+1] = rec_column1[i-1];
+  if (pxpy2rank(px-1,py,g) != -1)
+    for(i=1;i<=My;i++)
+      b[i][0] = rec_column_1[i-1];
 
   deallocate(send_column_1);
   deallocate(rec_column_1);
@@ -141,7 +143,7 @@ static int setBoundaries(
   field DM = fld->DM;
   const double amewa=(ia-((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
-  double dy2 = d->dy2;
+  double dyy = d->dysq;
   // Upper and Lower BCs
   for(j=0; j<Nx+2; ++j) {
     Psi[0][j]=0;
@@ -150,7 +152,7 @@ static int setBoundaries(
           +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
     if(j>ib-1)
       Psi[0][j]=Psi[0][ib-1];
-    Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dy2)/DMsq[0][j];
+    Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy)/DMsq[0][j];
     u[0][j]=0;
     v[0][j]=0;
     if(j>ia-1 && j<ib-1)
@@ -242,7 +244,11 @@ static double onePsiCalc(
       if(fabs(Psi[i][j]-Psi0[i][j])>Psi_tol)
         Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);
     }
+  printf("before Psi copy Psi0[0][0]=%lf\nPsi0[1][0]=%lf\nPsi0[2][0]%lf\n",
+      Psi0[0][0],Psi0[1][0],Psi0[2][0]);
   mpi_copy_boundaries(Nx,My,Psi0,Psi,g);
+  printf("after Psi copy Psi[0][0]=%lf\nPsi[1][0]=%lf\nPsi[2][0]%lf\n",
+      Psi[0][0],Psi[1][0],Psi[2][0]);
   return Psi_tol;
 }
 
@@ -296,10 +302,7 @@ static void omegaCalc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
-  fprintf(stderr,"copying Omega\n");
   mpi_copy_boundaries(Nx,My,Omega0,Omega,g);
-  fprintf(stderr,"done copying Omega\n");
-  fprintf(stderr,"Omega[0][0]=%lf\n",Omega[0][0]);
 }
 
 
@@ -311,10 +314,12 @@ void initDerived(config* c, space* s, derived* d)
   double dyy = SQUARE(dy);
   d->dxsq = dxx;
   d->dysq = dyy;
+  printf("dysq=%lf\n",dyy);
   double dx2 = 2*dx;
   double dy2 = 2*dy;
   d->dx2 = dx2;
   d->dy2 = dy2;
+  printf("dy2=%lf\n",dy2);
   double dt = c->dt;
   double Kappa2 = SQUARE(dx/dy);
   d->Kappasq = Kappa2;
@@ -416,9 +421,7 @@ void oneTimeStep(
 {
   omegaCalc(c,f,d,g);
   psiCalc(c,f,d,v,g);
-  printf("before BCs Omega[0][0]=%lf\n",f->Omega[0][0]);
   setBoundaries(c,s,v->time,f,d);
-  printf("after BCs Omega[0][0]=%lf\n",f->Omega[0][0]);
   velocityCalc(c,f,d);
   maxDiffCalc(c,f,v);
 }
