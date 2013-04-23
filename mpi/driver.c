@@ -61,6 +61,7 @@ void freeState(state* s)
 void initState(state* s)
 {
   partition(s->c,s->g);
+  printf("partitioned %d %d\n",s->g->n,s->g->m);
   initSpace(s->c,s->sp);
   initVolatile(s->c,0,s->v);
   initDerived(s->c,s->sp,s->dr);

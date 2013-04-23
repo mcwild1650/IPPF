@@ -21,6 +21,7 @@ static int writeFile(
   if(f_out==NULL)
     return -1;
 
+  printf("in restart Omega[0][0]=%lf\n",Omega[0][0]);
   for(i=0; i<My+2; ++i) {
     for(j=0; j<Nx+2; ++j)
       fprintf(f_out,"%30.13le",Omega[i][j]);

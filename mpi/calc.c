@@ -35,57 +35,77 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
 
   dest_rank=pxpy2rank(px+1,py,g);
   if(dest_rank!=-1)
-  {
+  { //receive right boundary from right processor or previous
     for(i=1;i<=My;i++)
-    {
+    { //send right column to right processor 
       send_column1[i-1]=b[i][Nx];
     }
     MPI_Isend(send_column1,My,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[0]);
     MPI_Irecv(rec_column1 ,My,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[1]);
   }
   else
-    for(i=1;i<=My;i++)
+  {
+    for(i=0;i<My+2;i++) //boundaries are copied entirely to maintain consistent corners
       b[i][Nx+1]=a[i][Nx+1];
+    request[0]=request[1]=MPI_REQUEST_NULL;
+  }
 
   dest_rank=pxpy2rank(px-1,py,g);
   if(dest_rank!=-1)
-  {
+  { //receive left boundary from left processor or previous
     for(i=1;i<=My;i++)
-    {
+    { //send left column to left processor
       send_column_1[i-1]=b[i][1];
     }
     MPI_Isend(send_column_1,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[2]);
     MPI_Irecv(rec_column_1 ,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[3]);
   }
   else
-    for(i=1;i<=My;i++)
-      b[i][0]=a[i][0];
-
-  dest_rank=pxpy2rank(px,py+1,g);
-  if(dest_rank!=-1)
   {
-    MPI_Isend(&b[My][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[4]);
-    MPI_Irecv(&b[0][1] ,Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[5]);
+    for(i=0;i<My+2;i++)
+      b[i][0]=a[i][0];
+    request[2]=request[3]=MPI_REQUEST_NULL;
   }
-  else
-    for(i=1;i<=Nx;i++)
-      b[My+1][i]=a[My+1][i];
 
   dest_rank=pxpy2rank(px,py-1,g);
   if(dest_rank!=-1)
   {
-    MPI_Isend(&a[1][1]   ,Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[6]);
+    //send bottom row to below processor
+    MPI_Isend(&b[1][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[6]);
+    //receive bottom boundary from below processor or previous
+    MPI_Irecv(&b[0][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[5]);
+  }
+  else
+  {
+    printf("Copying field0[0][0]=%lf to field[0][0]\n",a[0][0]);
+    for(i=0;i<Nx+2;i++)
+      b[0][i]=a[0][i];
+    printf("field[0][0]=%lf\n",b[0][0]);
+    request[4]=request[5]=MPI_REQUEST_NULL;
+  }
+
+  dest_rank=pxpy2rank(px,py+1,g);
+  if(dest_rank!=-1)
+  {
+    //send top row to above processor
+    MPI_Isend(&b[My][1]  ,Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[4]);
+    //receive top boundary from above processor or previous
     MPI_Irecv(&b[My+1][1],Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[7]);
   }
   else
-    for(i=1;i<=Nx;i++)
-      b[0][i]=a[0][i];
+  {
+    for(i=0;i<Nx+2;i++)
+      b[My+1][i]=a[My+1][i];
+    request[6]=request[7]=MPI_REQUEST_NULL;
+  }
+
   MPI_Waitall(8,request,MPI_STATUSES_IGNORE);
 
+  //copy the columns where they belong
   for(i=1;i<=My;i++)
-    b[i][0] = rec_column1[i-1];
+    b[i][Nx+1] = rec_column1[i-1];
   for(i=1;i<=My;i++)
-    b[i][Nx+1] = rec_column_1[i-1];
+    b[i][0] = rec_column_1[i-1];
 
   deallocate(send_column_1);
   deallocate(rec_column_1);
@@ -288,7 +308,10 @@ static void omegaCalc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
+  fprintf(stderr,"copying Omega\n");
   mpi_copy_boundaries(Nx,My,Omega0,Omega,g);
+  fprintf(stderr,"done copying Omega\n");
+  fprintf(stderr,"Omega[0][0]=%lf\n",Omega[0][0]);
 }
 
 
@@ -405,7 +428,9 @@ void oneTimeStep(
 {
   omegaCalc(c,f,d,g);
   psiCalc(c,f,d,v,g);
+  printf("before BCs Omega[0][0]=%lf\n",f->Omega[0][0]);
   setBoundaries(c,s,v->time,f,d);
+  printf("after BCs Omega[0][0]=%lf\n",f->Omega[0][0]);
   velocityCalc(c,f,d);
   maxDiffCalc(c,f,v);
 }
