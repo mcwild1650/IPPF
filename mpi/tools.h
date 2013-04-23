@@ -1,7 +1,6 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
- 
 #define PARALLEL
 
 #include <stddef.h>
@@ -13,20 +12,17 @@ void* allocate(size_t bytes);
 void deallocate(void* memory);
 
 void startParallel(void);
-int parallelRan(void);
+int parallelRank(void);
 int parallelSize(void);
 void stopParallel(void);
 void broadcast(void* p, size_t s);
 #define BROADCAST(o) broadcast(&(o),sizeof(o))
 void zero_out(void* p, size_t s);
 #define ZERO_OUT(o) zero_out(&(o),sizeof(o))
+#define MAKE(p) do{ALLOCATE(p,1);ZERO_OUT(*(p));}while(0)
 
-double square(double x);
 #define SQUARE(x) ((x)*(x))
 #define MAX(a,b) (((b)>(a))?(b):(a))
 #define MIN(a,b) (((b)<(a))?(b):(a))
 
-
-
- 
 #endif

@@ -1,15 +1,16 @@
 #ifndef GRID_H
 #define GRID_H
 
+#include "config.h"
+
 typedef struct {
-  int px;
-  int py;
-  int dx;
-  int dy;
-  int lastx;
-  int lasty;
+  int x,y;
+  int m,n;
+  int dx,dy;
+  int lastx,lasty;
+  int px,py;
 } grid;
 
-void computeGrid(int x, int y, int p, grid* g);
+void partition(config* c, grid* g);
 
 #endif

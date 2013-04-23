@@ -5,14 +5,16 @@
 #include "space.h"
 #include "config.h"
 #include "calc.h"
+#include "grid.h"
 
 //struct containing heirarchy of data for calculation
 typedef struct {
-  fields* f;
-  space* sp;
   config* c;
-  derived* dr;
+  grid* g;
+  space* sp;
   vol* v;
+  derived* dr;
+  fields* f;
 } state;
 
 typedef enum {

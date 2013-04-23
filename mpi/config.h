@@ -10,18 +10,9 @@ typedef struct {
 } jet_config;
 
 #define FILENAME_LENGTH 64
-typedef struct {
- int myrank;
- int mpi_size;
- int my_x_start,my_x_end;
- int my_y_start,my_y_end;
- int m,n;  // totoal partition number in x and y direction
- int px,py;   //position of this cell 
-}  mpipara;
 
 typedef struct {
   int Nx, My;    // Nx,My in a rank
-  int tot_Nx,tot_My;   /////// the same with the original Nx, My
   double Re;
   double A;
   int Ot;
@@ -34,7 +25,6 @@ typedef struct {
   int psave;
   double Xmin,Xmax;
   double Ymin,Ymax;
-  mpipara mpi_para;
 } config;
 
 void askConfig(config* c);
