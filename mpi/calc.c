@@ -98,6 +98,8 @@ static int setBoundaries(
     space* s,
     double t,
     fields* fld,
+    //derived* d,
+    //grid* g)
     derived* d)
 {
   int i,j;
@@ -119,10 +121,20 @@ static int setBoundaries(
   field v = fld->v;
   field DMsq = fld->DMsq;
   field DM = fld->DM;
+  /*int x=g->x;
+  int y=g->y;
+  int m=g->m;
+  int n=g->n;
+  int lastx=g->lastx;
+  int lasty=g->lasty;
+  int start_x=g->*/
+
+  //const double amewa=(ia-((x+1)/2+1))*dx;
   const double amewa=(ia-((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dy2 = d->dy2;
   // Upper and Lower BCs
+  //for(j=0; j<dx+2; ++j) {
   for(j=0; j<Nx+2; ++j) {
     Psi[0][j]=0;
     if(j>=ia-1 && j<=ib-1)
