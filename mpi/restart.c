@@ -1,6 +1,182 @@
 #include "restart.h"
 #include "tools.h"
 #include <stdio.h>
+#include <string.h>
+#include <mpi.h>
+
+#define VALUE_CHARS 30
+#define NUM_INTEGERS 7
+#define NUM_DOUBLES 14
+
+static void writeField(
+    MPI_File file,
+    int x0,
+    int x1,
+    int y0,
+    int y1,
+    MPI_Offset start,
+    MPI_Offset rc,
+    int eol,
+    field f)
+{
+  int i,j;
+  MPI_Offset ro,o;
+  char v[VALUE_CHARS+1];
+  for (i = y0; i < y1; ++i)
+  {
+    ro = start + rc*(i-y0);
+    o = ro;
+    for (j = x0; j < x1; ++j)
+    {
+      snprintf(v,VALUE_CHARS+1,"%30.13le",f[i][j]);
+      MPI_File_write_at(file,o,v,VALUE_CHARS,MPI_BYTE,MPI_STATUS_IGNORE);
+      o += VALUE_CHARS;
+    }
+    if (eol)
+    {
+      snprintf(v,2,"\n");
+      MPI_File_write_at(file,o,v,1,MPI_BYTE,MPI_STATUS_IGNORE);
+    }
+  }
+}
+
+static void makeIntegers(
+    config* c,
+    vol* v,
+    int* ints)
+{
+  ints[0] = c->Nx+2;
+  ints[1] = c->My+2;
+  ints[2] = v->step;
+  ints[3] = 0; //???
+  ints[4] = c->IBL;
+  ints[5] = c->jet.ia;
+  ints[6] = c->jet.ib;
+}
+
+static void writeIntegers(
+    MPI_File file,
+    MPI_Offset o,
+    int x,
+    int* ints)
+{
+  int i;
+  char v[VALUE_CHARS+1];
+  for (i=0; i < NUM_INTEGERS; ++i)
+  {
+    snprintf(v,VALUE_CHARS+1,"%30d",ints[i]);
+    MPI_File_write_at(file,o,v,VALUE_CHARS,MPI_BYTE,MPI_STATUS_IGNORE);
+    o += VALUE_CHARS;
+  }
+  snprintf(v,VALUE_CHARS+1,"%30d",0);
+  for (; i < x+2; ++i)
+  {
+    MPI_File_write_at(file,o,v,VALUE_CHARS,MPI_BYTE,MPI_STATUS_IGNORE);
+    o += VALUE_CHARS;
+  }
+  snprintf(v,2,"\n");
+  MPI_File_write_at(file,o,v,1,MPI_BYTE,MPI_STATUS_IGNORE);
+}
+
+static void makeDoubles(
+    config* c,
+    vol* v,
+    space* s,
+    double* doubles)
+{
+  doubles[0] = c->Re;
+  doubles[1] = v->Omega_tol;
+  doubles[2] = v->Psi_tol;
+  doubles[3] = s->dx;
+  doubles[4] = s->dy;
+  doubles[5] = c->dt;
+  doubles[6] = c->Tol;
+  doubles[7] = c->Xmin;
+  doubles[8] = c->Xmax;
+  doubles[9] = c->Ymin;
+  doubles[10] = c->Ymax;
+  doubles[11] = c->A;
+  doubles[12] = c->jet.freq;
+  doubles[13] = c->jet.c0;
+}
+
+static void writeDoubles(
+    MPI_File file,
+    MPI_Offset o,
+    int x,
+    double* doubles)
+{
+  int i;
+  char v[VALUE_CHARS+1];
+  for (i=0; i < NUM_DOUBLES; ++i)
+  {
+    snprintf(v,VALUE_CHARS+1,"%30.13le",doubles[i]);
+    MPI_File_write_at(file,o,v,VALUE_CHARS,MPI_BYTE,MPI_STATUS_IGNORE);
+    o += VALUE_CHARS;
+  }
+  snprintf(v,VALUE_CHARS+1,"%30.13le",0.0);
+  for (; i < x+2; ++i)
+  {
+    MPI_File_write_at(file,o,v,VALUE_CHARS,MPI_BYTE,MPI_STATUS_IGNORE);
+    o += VALUE_CHARS;
+  }
+  snprintf(v,2,"\n");
+  MPI_File_write_at(file,o,v,1,MPI_BYTE,MPI_STATUS_IGNORE);
+}
+
+void writeOutput(
+    config* c,
+    space* s,
+    fields* f,
+    vol* vl,
+    grid* g)
+{
+  int dx = g->dx;
+  int dy = g->dy;
+  int n = g->n;
+  int Nx = c->Nx;
+  int My = c->My;
+  int px = g->px;
+  int py = g->py;
+  int x = g->x;
+  int y = g->y;
+  int x0,x1,y0,y1;
+  MPI_Offset rc,fc,fs,o;
+  MPI_File file;
+  int amode = MPI_MODE_CREATE | MPI_MODE_WRONLY;
+  char* fn = c->filename;
+  int eol;
+  MPI_File_open(MPI_COMM_WORLD,fn,amode,MPI_INFO_NULL,&file);
+  x0 = (px==0)?(0):(1);
+  x1 = (px==(n-1))?(Nx+2):(Nx+1);
+  y0 = (py==0)?(0):(1);
+  y1 = (py==(n-1))?(My+2):(My+1);
+  rc = VALUE_CHARS*(x+2) + 1;
+  fc = rc*(y+2);
+  fs = fc*4 + rc*2;
+  o = rc*(py*dy+y0) + VALUE_CHARS*(px*dx+x0);
+  MPI_File_preallocate(file,fs);
+  eol = (px == n-1);
+  writeField(file,x0,x1,y0,y1,o,rc,eol,f->Omega);
+  o += fc;
+  writeField(file,x0,x1,y0,y1,o,rc,eol,f->Psi);
+  o += fc;
+  writeField(file,x0,x1,y0,y1,o,rc,eol,f->u);
+  o += fc;
+  writeField(file,x0,x1,y0,y1,o,rc,eol,f->v);
+  if ( ! parallelRank())
+  {
+    int ints[NUM_INTEGERS];
+    double doubles[NUM_DOUBLES];
+    makeIntegers(c,vl,ints);
+    makeDoubles(c,vl,s,doubles);
+    o = fc*4;
+    writeIntegers(file,o,x,ints);
+    o += rc;
+    writeDoubles(file,o,x,doubles);
+  }
+  MPI_File_close(&file);
+}
 
 // Program output to file
 static int writeFile(

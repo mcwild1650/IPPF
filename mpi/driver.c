@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     readConfig(a.configfile,c); 
     initState(&s); 
     calculate(s.c,s.sp,s.g,s.f,s.dr,s.v);
-    writeOldRestart(s.c,s.sp,s.f,s.dr,s.v);
+    writeOutput(s.c,s.sp,s.f,s.v,s.g);
     freeState(&s);
   }
   else if (a.m == restart_mode)
