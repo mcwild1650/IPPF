@@ -113,6 +113,21 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   deallocate(rec_column1);
 }
 
+static double fieldMaxDifference(int Nx,int My,field A, field B)
+{
+  int i,j;
+  double local_diff=0;
+  double global_diff;
+  for(i=0;i<My+2;++i)
+  for(j=0;j<Nx+2;++j)
+  {
+    if(fabs(A[i][j]-B[i][j])>local_diff)
+      local_diff=fabs(A[i][j]-B[i][j]);
+  }
+  MPI_Allreduce(&local_diff,&global_diff,1,MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+  return global_diff;
+}
+
 static int setBoundaries(
     config* c,
     space* s,
@@ -227,10 +242,9 @@ static double onePsiCalc(
   double KappaA = d->KappaA;
   double Kappasq = d->Kappasq;
   double dxsq = d->dxsq;
-  double Psi_tol = 0;
   int i,j;
   for(i=1; i<My+1; ++i)
-    for(j=1; j<Nx+1; ++j) {
+    for(j=1; j<Nx+1; ++j)
       Psi[i][j]=
         KappaA*
 //todo: build a matrix of these:
@@ -239,11 +253,8 @@ static double onePsiCalc(
           Psi0[i][j-1]+
           Kappasq*(Psi0[i+1][j]+
                    Psi0[i-1][j]));
-      if(fabs(Psi[i][j]-Psi0[i][j])>Psi_tol)
-        Psi_tol=fabs(Psi[i][j]-Psi0[i][j]);
-    }
   mpi_copy_boundaries(Nx,My,Psi0,Psi,g);
-  return Psi_tol;
+  return fieldMaxDifference(Nx,My,Psi0,Psi);
 }
 
 static void psiCalc(
@@ -377,19 +388,6 @@ void initFields(config* c, space* s, derived* d, fields* f)
     Psi[0][j]=(x[j]+A)*(y[0]-1);
     Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
   }
-}
-
-static double fieldMaxDifference(int Nx,int My,field A, field B)
-{
-  int i,j;
-  double max_diff=0;
-  for(i=0;i<My+2;++i)
-  for(j=0;j<Nx+2;++j)
-  {
-    if(fabs(A[i][j]-B[i][j])>max_diff)
-      max_diff=fabs(A[i][j]-B[i][j]);
-  }
-  return max_diff;
 }
 
 static void maxDiffCalc(
