@@ -12,5 +12,11 @@ void writeOldRestart(
     fields* f,
     derived* d,
     vol* vl);
+void writeOutput(
+    config* c,
+    space* s,
+    fields* f,
+    vol* vl,
+    grid* g);
 
 #endif
