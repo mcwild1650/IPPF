@@ -118,9 +118,8 @@ static int setBoundaries(
     space* s,
     double t,
     fields* fld,
-    //derived* d,
-    //grid* g)
-    derived* d)
+    derived* d,
+    grid* g)
 {
   int i,j;
   jet_config* jet = &(c->jet);
@@ -141,26 +140,60 @@ static int setBoundaries(
   field v = fld->v;
   field DMsq = fld->DMsq;
   field DM = fld->DM;
-  /*int x=g->x;
+  int px=g->px;
+  int py=g->py;
+  int x=g->x;
   int y=g->y;
   int m=g->m;
   int n=g->n;
   int lastx=g->lastx;
   int lasty=g->lasty;
-  int start_x=g->*/
+  int start_x=g->x*g->dx;
+  int len_x=(px!=n-1)?g->dx:g->lastx;
+  int len_y=(py!=m-1)?g->dy:g->lasty;
+    
 
-  //const double amewa=(ia-((x+1)/2+1))*dx;
-  const double amewa=(ia-((Nx+1)/2+1))*dx;
+  const double amewa=(ia-((x+1)/2+1))*dx;
+  double jet_val;
+  //const double amewa=(ia-((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dy2 = d->dy2;
   // Upper and Lower BCs
-  //for(j=0; j<dx+2; ++j) {
-  for(j=0; j<Nx+2; ++j) {
+  if(px==0)
+  {
+    for(j=0; j<len_x+2; ++j) {
+      Psi[0][j]=0;
+      if(start_x+j>=ia-1 && start_x+j<=ib-1)
+        Psi[0][j]=(-c0*(-0.5*amewa*sqrt(amewa*amewa+1)-0.5*sinh(amewa)
+            +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
+      if(start_x+j>ib-1)
+        Psi[0][j]=Psi[0][ib-1];
+      Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dy2)/DMsq[0][j];
+      u[0][j]=0;
+      v[0][j]=0;
+      if(j>ia-1 && j<ib-1)
+        v[0][j]=c0*f;
+      if(j>=ia-2 && j<=ib)
+        Omega[0][j]+=(v[0][j+1]*sqrt(x[j+1]*x[j+1]+1)
+          -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
+    }
+  }
+  if(px==n)
+  {
+    for(j=0; j<len_x+2; ++j) {
+      Omega[My+1][j]=0;
+      Psi[My+1][j]=(x[j]+A)*(y[My+1]-1);
+      u[My+1][j]=(x[j]+A)/DM[My+1][j];
+      v[My+1][j]=-(y[My+1]-1)/DM[My+1][j];
+    }
+  }
+  for(j=0; j<len_x+2; ++j) {
+  //for(j=0; j<Nx+2; ++j) {
     Psi[0][j]=0;
-    if(j>=ia-1 && j<=ib-1)
+    if(start_x+j>=ia-1 && start_x+j<=ib-1)
       Psi[0][j]=(-c0*(-0.5*amewa*sqrt(amewa*amewa+1)-0.5*sinh(amewa)
           +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
-    if(j>ib-1)
+    if(start_x+j>ib-1)
       Psi[0][j]=Psi[0][ib-1];
     Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dy2)/DMsq[0][j];
     u[0][j]=0;
