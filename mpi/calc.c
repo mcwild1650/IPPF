@@ -143,7 +143,6 @@ static int setBoundaries(
   double c0 = jet->c0;
   double freq = jet->ia;
   int Nx = c->Nx;
-  int My = c->My;
   double A = c->A;
   int IBL = c->IBL;
   double dx = s->dx;
@@ -157,33 +156,31 @@ static int setBoundaries(
   field DM = fld->DM;
   int px=g->px;
   int py=g->py;
-  int x=g->x;
-  int y=g->y;
   int m=g->m;
   int n=g->n;
-  int lastx=g->lastx;
-  int lasty=g->lasty;
   int start_x=g->x*g->dx;
-  int len_x=(px!=n-1)?g->dx:g->lastx;
-  int len_y=(py!=m-1)?g->dy:g->lasty;
-    
+  int start_y=g->y*g->dy;
+  int len_x=g->len_x;
+  int len_y=g->len_y;
+  double past_jet_val, x_end_jet;
 
-  const double amewa=(ia-((x+1)/2+1))*dx;
-  double jet_val;
-  //const double amewa=(ia-((Nx+1)/2+1))*dx;
+  const double amewa=(ia-((Nx+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dyy = d->dysq;
   // Upper and Lower BCs
   if(px==0)
   {
+    x_end_jet=c->Xmin+dx*(ib-1);
+    past_jet_val=(-c0*(-0.5*amewa*sqrt(SQUARE(amewa)+1)-0.5*sinh(amewa)
+                 +0.5*x_end_jet*sqrt(SQUARE(x_end_jet)+1)+0.5*sinh(x_end_jet)))*f;
     for(j=0; j<len_x+2; ++j) {
       Psi[0][j]=0;
       if(start_x+j>=ia-1 && start_x+j<=ib-1)
-        Psi[0][j]=(-c0*(-0.5*amewa*sqrt(amewa*amewa+1)-0.5*sinh(amewa)
+        Psi[0][j]=(-c0*(-0.5*amewa*sqrt(SQUARE(amewa)+1)-0.5*sinh(amewa)
             +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
       if(start_x+j>ib-1)
-        Psi[0][j]=Psi[0][ib-1];
-      Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dy2)/DMsq[0][j];
+        Psi[0][j]=past_jet_val;
+      Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy)/DMsq[0][j];
       u[0][j]=0;
       v[0][j]=0;
       if(j>ia-1 && j<ib-1)
@@ -196,55 +193,43 @@ static int setBoundaries(
   if(px==n)
   {
     for(j=0; j<len_x+2; ++j) {
-      Omega[My+1][j]=0;
-      Psi[My+1][j]=(x[j]+A)*(y[My+1]-1);
-      u[My+1][j]=(x[j]+A)/DM[My+1][j];
-      v[My+1][j]=-(y[My+1]-1)/DM[My+1][j];
+      Omega[len_y+1][j]=0;
+      Psi[len_y+1][j]=(x[j]+A)*(y[len_y+1]-1);
+      u[len_y+1][j]=(x[j]+A)/DM[len_y+1][j];
+      v[len_y+1][j]=-(y[len_y+1]-1)/DM[len_y+1][j];
     }
   }
-  for(j=0; j<len_x+2; ++j) {
-  //for(j=0; j<Nx+2; ++j) {
-    Psi[0][j]=0;
-    if(start_x+j>=ia-1 && start_x+j<=ib-1)
-      Psi[0][j]=(-c0*(-0.5*amewa*sqrt(amewa*amewa+1)-0.5*sinh(amewa)
-          +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
-    if(start_x+j>ib-1)
-      Psi[0][j]=Psi[0][ib-1];
-    Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy)/DMsq[0][j];
-    u[0][j]=0;
-    v[0][j]=0;
-    if(j>ia-1 && j<ib-1)
-      v[0][j]=c0*f;
-    if(j>=ia-2 && j<=ib)
-      Omega[0][j]+=(v[0][j+1]*sqrt(x[j+1]*x[j+1]+1)
-        -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
-    Omega[My+1][j]=0;
-    Psi[My+1][j]=(x[j]+A)*(y[My+1]-1);
-    u[My+1][j]=(x[j]+A)/DM[My+1][j];
-    v[My+1][j]=-(y[My+1]-1)/DM[My+1][j];
-  }
-
   // Side BCs
-  for(i=1; i<My+1; ++i) {
-    if(i<IBL) {
-      Omega[i][0]=Omega[i][1];
-      Psi[i][0]=Psi[i][1];
-      u[i][0]=u[i][1];
-      v[i][0]=v[i][1];
-      Omega[i][Nx+1]=Omega[i][Nx];
-      Psi[i][Nx+1]=Psi[i][Nx];
-      u[i][Nx+1]=u[i][Nx];
-      v[i][Nx+1]=v[i][Nx];
+  if(py==0)
+  {
+    for(i=1; i<len_y+1; ++i) {
+      if(start_y+i<IBL) {
+        Omega[i][0]=Omega[i][1];
+        Psi[i][0]=Psi[i][1];
+        u[i][0]=u[i][1];
+        v[i][0]=v[i][1];
+      }else{
+        Omega[i][0]=0;
+        Psi[i][0]=(x[0]+A)*(y[i]-1);
+        u[i][0]=(x[0]+A)/DM[i][0];
+        v[i][0]=-(y[i]-1)/DM[i][0];
+      }
     }
-    else {
-      Omega[i][0]=0;
-      Psi[i][0]=(x[0]+A)*(y[i]-1);
-      u[i][0]=(x[0]+A)/DM[i][0];
-      v[i][0]=-(y[i]-1)/DM[i][0];
-      Omega[i][Nx+1]=0;
-      Psi[i][Nx+1]=(x[Nx+1]+A)*(y[i]-1);
-      u[i][Nx+1]=(x[Nx+1]+A)/DM[i][Nx+1];
-      v[i][Nx+1]=-(y[i]-1)/DM[i][Nx+1];
+  }
+  if(py==m)
+  {
+    for(i=1; i<len_y+1; ++i) {
+      if(start_y+i<IBL) {
+        Omega[i][len_x+1]=Omega[i][len_x];
+        Psi[i][len_x+1]=Psi[i][len_x];
+        u[i][len_x+1]=u[i][len_x];
+        v[i][len_x+1]=v[i][len_x];
+      }else{
+        Omega[i][len_x+1]=0;
+        Psi[i][len_x+1]=(x[len_x+1]+A)*(y[i]-1);
+        u[i][len_x+1]=(x[len_x+1]+A)/DM[i][len_x+1];
+        v[i][len_x+1]=-(y[i]-1)/DM[i][len_x+1];
+      }
     }
   }
   return 0;
@@ -253,19 +238,21 @@ static int setBoundaries(
 static void velocityCalc(
     config* c,
     fields* f,
-    derived* d)
+    derived* d,
+    grid* g)
 {
   int i,j;
   field u = f->u;
   field v = f->v;
   field Psi = f->Psi;
   field DM = f->DM;
-  const int Nx = c->Nx;
-  const int My = c->My;
   const double dx2 = d->dx2;
   const double dy2 = d->dy2;
-  for(i=1; i<My+1; ++i)
-  for(j=1; j<Nx+1; ++j)
+  int len_x=g->len_x;
+  int len_y=g->len_y;
+
+  for(i=1; i<len_y+1; ++i)
+  for(j=1; j<len_x+1; ++j)
   {
     u[i][j]= (Psi[i+1][j]-Psi[i-1][j])/dy2/DM[i][j];
     v[i][j]=-(Psi[i][j+1]-Psi[i][j-1])/dx2/DM[i][j];
@@ -280,16 +267,17 @@ static double onePsiCalc(
     derived* d,
     grid* g)
 {
-  int Nx = c->Nx;
-  int My = c->My;
+  int len_x=g->len_x;
+  int len_y=g->len_y;
   field DMsq = f->DMsq;
   field Omega = f->Omega;
   double KappaA = d->KappaA;
   double Kappasq = d->Kappasq;
   double dxsq = d->dxsq;
   int i,j;
-  for(i=1; i<My+1; ++i)
-    for(j=1; j<Nx+1; ++j)
+
+  for(i=1; i<len_y+1; ++i)
+    for(j=1; j<len_x+1; ++j)
       Psi[i][j]=
         KappaA*
 //todo: build a matrix of these:
@@ -298,8 +286,8 @@ static double onePsiCalc(
           Psi0[i][j-1]+
           Kappasq*(Psi0[i+1][j]+
                    Psi0[i-1][j]));
-  mpi_copy_boundaries(Nx,My,Psi0,Psi,g);
-  return fieldMaxDifference(Nx,My,Psi0,Psi);
+  mpi_copy_boundaries(len_x,len_y,Psi0,Psi,g);
+  return fieldMaxDifference(len_x,len_y,Psi0,Psi);
 }
 
 static void psiCalc(
@@ -340,11 +328,11 @@ static void omegaCalc(
   double alphaY=d->alphaY;
   double Cxd2=d->Cxd2;
   double Cyd2=d->Cyd2;
-  int My=c->My;
-  int Nx=c->Nx;
+  int len_x=g->len_x;
+  int len_y=g->len_y;
 
-  for(i=1;i<My+1;++i)
-  for(j=1;j<Nx+1;++j)
+  for(i=1;i<len_y+1;++i)
+  for(j=1;j<len_x+1;++j)
   {
     Omega[i][j]=Omega0[i][j]*(1-alpha/DMsq[i][j])+
                 Omega0[i][j+1]*(-Cxd2*u[i][j+1]*DM[i][j+1]+alphaX)/DMsq[i][j]+
@@ -352,7 +340,7 @@ static void omegaCalc(
                 Omega0[i+1][j]*(-Cyd2*v[i+1][j]*DM[i+1][j]+alphaY)/DMsq[i][j]+
                 Omega0[i-1][j]*( Cyd2*v[i-1][j]*DM[i-1][j]+alphaY)/DMsq[i][j];
   }
-  mpi_copy_boundaries(Nx,My,Omega0,Omega,g);
+  mpi_copy_boundaries(len_x,len_y,Omega0,Omega,g);
 }
 
 
@@ -400,11 +388,11 @@ void initVolatile(
   v->time = k*(c->dt);
 }
 
-void initFields(config* c, space* s, derived* d, fields* f)
+void initFields(config* c, space* s, derived* d, fields* f, grid* g)
 {
   int i,j;
-  int Nx = c->Nx;
-  int My = c->My;
+  int len_x=g->len_x;
+  int len_y=g->len_y;
   field u = f->u;
   field v = f->v;
   field DM = f->DM;
@@ -415,19 +403,19 @@ void initFields(config* c, space* s, derived* d, fields* f)
   double* y = s->y;
   double A = c->A;
   double dyy = d->dysq;
-  for(i=0; i<My+2; ++i)
-    for(j=0; j<Nx+2; ++j) {
+  for(i=0; i<len_y+2; ++i)
+    for(j=0; j<len_x+2; ++j) {
       DM2[i][j]=SQUARE(x[j])+SQUARE(y[i]);
       DM[i][j]=sqrt(DM2[i][j]);
     }
-  for(i=1; i<My+2; ++i)
-    for(j=0; j<Nx+2; ++j) {
+  for(i=1; i<len_y+2; ++i)
+    for(j=0; j<len_x+2; ++j) {
       v[i][j]=-(y[i]-1)/DM[i][j];
       u[i][j]=(x[j]+A)/DM[i][j];
       Psi[i][j]=(x[j]+A)*(y[i]-1);
       Omega[i][j]=0;
     }
-  for(j=0; j<Nx+2; ++j) {
+  for(j=0; j<len_x+2; ++j) {
     v[0][j]=-(y[0]-1)/DM[0][j];
     u[0][j]=0;
     Psi[0][j]=(x[j]+A)*(y[0]-1);
@@ -438,12 +426,13 @@ void initFields(config* c, space* s, derived* d, fields* f)
 static void maxDiffCalc(
     config* c,
     fields* f,
+    grid* g,
     vol* vl)
 {
-  int Nx = c->Nx;
-  int My = c->My;
-  vl->Omega_tol = fieldMaxDifference(Nx,My,f->Omega,f->Omega0);
-  vl->Psi_tol = fieldMaxDifference(Nx,My,f->Psi,f->Psi0);
+  int len_x=g->len_x;
+  int len_y=g->len_y;
+  vl->Omega_tol = fieldMaxDifference(len_x,len_y,f->Omega,f->Omega0);
+  vl->Psi_tol = fieldMaxDifference(len_x,len_y,f->Psi,f->Psi0);
 }
 
 void oneTimeStep(
@@ -456,9 +445,9 @@ void oneTimeStep(
 {
   omegaCalc(c,f,d,g);
   psiCalc(c,f,d,v,g);
-  setBoundaries(c,s,v->time,f,d);
-  velocityCalc(c,f,d);
-  maxDiffCalc(c,f,v);
+  setBoundaries(c,s,v->time,f,d,g);
+  velocityCalc(c,f,d,g);
+  maxDiffCalc(c,f,g,v);
 }
 
 void calculate(

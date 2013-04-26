@@ -62,11 +62,11 @@ void initState(state* s)
 {
   partition(s->c,s->g);
   printf("partitioned %d %d\n",s->g->n,s->g->m);
-  initSpace(s->c,s->sp);
+  initSpace(s->c,s->g,s->sp);
   initVolatile(s->c,0,s->v);
   initDerived(s->c,s->sp,s->dr);
-  makeFields(s->f,s->c->Nx,s->c->My);
-  initFields(s->c,s->sp,s->dr,s->f);
+  makeFields(s->f,s->g->len_x,s->g->len_y);
+  initFields(s->c,s->sp,s->dr,s->f,s->g);
 }
 
 int main(int argc, char** argv)

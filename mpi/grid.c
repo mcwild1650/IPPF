@@ -55,6 +55,8 @@ void partition(config* c, grid* g)
   int rank = parallelRank();
   g->py = rank/(g->n);
   g->px = rank%(g->n);
+  g->len_x=(g->px!=n-1)?g->dx:g->lastx;
+  g->len_y=(g->py!=m-1)?g->dy:g->lasty;
   if (g->py == g->m-1)
     c->Nx = g->lastx;
   else
