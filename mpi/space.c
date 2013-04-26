@@ -12,7 +12,7 @@ static void linspace(const double min, const double max, const int N,
   if(start+len==N)
     x[N-1]=max;
   else
-    x[N-1]=min+(*dx)*(start+N-1);
+    x[N-1]=min+(*dx)*(start+len-1);
   for(i=1; i<len-1; ++i)
     x[i]=x[i-1]+*dx;
 }
