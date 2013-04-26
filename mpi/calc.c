@@ -27,6 +27,17 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   px= g->px;
   py= g->py;
 
+  /*
+     Tags used for SENDING boundaries:
+
+     -----2-----
+  Y^ |          |
+   | |          |
+   | 3          1
+     |          |
+     |          |
+   0 -----0------
+     0      ---> X */
 
   ALLOCATE(send_column1,My);
   ALLOCATE(send_column_1,My);
@@ -40,8 +51,8 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
     { //send right column to right processor 
       send_column1[i-1]=b[i][Nx];
     }
-    MPI_Isend(send_column1,My,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[0]);
-    MPI_Irecv(rec_column1 ,My,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[1]);
+    MPI_Isend(send_column1,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[0]);
+    MPI_Irecv(rec_column1 ,My,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[1]);
   }
   else
   {
@@ -57,7 +68,7 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
     { //send left column to left processor
       send_column_1[i-1]=b[i][1];
     }
-    MPI_Isend(send_column_1,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[2]);
+    MPI_Isend(send_column_1,My,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[2]);
     MPI_Irecv(rec_column_1 ,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[3]);
   }
   else
@@ -71,7 +82,7 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   if(dest_rank!=-1)
   {
     //send bottom row to below processor
-    MPI_Isend(&b[1][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[6]);
+    MPI_Isend(&b[1][1],Nx,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[6]);
     //receive bottom boundary from below processor or previous
     MPI_Irecv(&b[0][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[5]);
   }
@@ -86,9 +97,9 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   if(dest_rank!=-1)
   {
     //send top row to above processor
-    MPI_Isend(&b[My][1]  ,Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[4]);
+    MPI_Isend(&b[My][1]  ,Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[4]);
     //receive top boundary from above processor or previous
-    MPI_Irecv(&b[My+1][1],Nx,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[7]);
+    MPI_Irecv(&b[My+1][1],Nx,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[7]);
   }
   else
   {
@@ -142,7 +153,7 @@ static int setBoundaries(
   int ib = jet->ib;
   double c0 = jet->c0;
   double freq = jet->ia;
-  int Nx = c->Nx;
+  int total_x = g->x;
   double A = c->A;
   int IBL = c->IBL;
   double dx = s->dx;
@@ -164,7 +175,7 @@ static int setBoundaries(
   int len_y=g->len_y;
   double past_jet_val, x_end_jet;
 
-  const double amewa=(ia-((Nx+1)/2+1))*dx;
+  const double amewa=(ia-((total_x+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dyy = d->dysq;
   // Upper and Lower BCs

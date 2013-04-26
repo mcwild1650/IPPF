@@ -115,5 +115,5 @@ void readConfig(const char* filename, config* c)
 
 void broadcastConfig(config* c)
 {
-  MPI_Bcast(c,sizeof(c),MPI_PACKED,0,MPI_COMM_WORLD);
+  MPI_Bcast(c,sizeof(*c),MPI_PACKED,0,MPI_COMM_WORLD);
 }
