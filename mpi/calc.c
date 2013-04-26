@@ -169,8 +169,8 @@ static int setBoundaries(
   int py=g->py;
   int m=g->m;
   int n=g->n;
-  int start_x=g->x*g->dx;
-  int start_y=g->y*g->dy;
+  int start_x=g->px*g->dx;
+  int start_y=g->py*g->dy;
   int Nx=c->Nx;
   int My=c->My;
   double past_jet_val, x_end_jet;
@@ -226,7 +226,7 @@ static int setBoundaries(
       }
     }
   }
-  if(py==m)
+  if(py==m-1)
   {
     for(i=1; i<My+1; ++i) {
       if(start_y+i<IBL) {
@@ -445,6 +445,17 @@ static void maxDiffCalc(
   vl->Psi_tol = fieldMaxDifference(Nx,My,f->Psi,f->Psi0);
 }
 
+static void printField(int Nx, int My, field f)
+{
+  int i,j;
+  for (i=0; i < My+2; ++i)
+  {
+    for (j=0; j < Nx+2; ++j)
+      printf("%30.13e",f[i][j]);
+    printf("\n");
+  }
+}
+
 void oneTimeStep(
     config* c,
     space* s,
@@ -454,8 +465,10 @@ void oneTimeStep(
     vol* v)
 {
   omegaCalc(c,f,d,g);
+  printField(c->Nx,c->My,f->Omega);
   psiCalc(c,f,d,v,g);
   setBoundaries(c,s,v->time,f,d,g);
+  printField(c->Nx,c->My,f->Omega);
   velocityCalc(c,f,d,g);
   maxDiffCalc(c,f,g,v);
 }
