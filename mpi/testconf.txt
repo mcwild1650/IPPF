@@ -2,8 +2,8 @@ Nx 20
 My 4
 Reynolds Number 700
 Circulation 1.600000
-Timesteps 10
-Report Steps 10
+Timesteps 1
+Report Steps 1
 dt 0.0007
 Tolerance 0.000100
 Boundary Layer 20
@@ -13,4 +13,4 @@ Jet End 107
 Jet Amplitude .01
 Jet Frequency .05
 Filename out.dat
-Save Steps 10
+Save Steps 1

@@ -43,10 +43,11 @@ static void writeField(
 static void makeIntegers(
     config* c,
     vol* v,
+    grid* g,
     int* ints)
 {
-  ints[0] = c->Nx+2;
-  ints[1] = c->My+2;
+  ints[0] = g->x+2;
+  ints[1] = g->y+2;
   ints[2] = v->step;
   ints[3] = 0; //???
   ints[4] = c->IBL;
@@ -134,23 +135,20 @@ void writeOutput(
   int dx = g->dx;
   int dy = g->dy;
   int n = g->n;
-  int Nx = c->Nx;
-  int My = c->My;
   int px = g->px;
   int py = g->py;
   int x = g->x;
   int y = g->y;
-  int x0,x1,y0,y1;
+  int x0 = g->x0;
+  int x1 = g->x1;
+  int y0 = g->y0;
+  int y1 = g->y1;
   MPI_Offset rc,fc,fs,o;
   MPI_File file;
   int amode = MPI_MODE_CREATE | MPI_MODE_WRONLY;
   char* fn = c->filename;
   int eol;
   MPI_File_open(MPI_COMM_WORLD,fn,amode,MPI_INFO_NULL,&file);
-  x0 = (px==0)?(0):(1);
-  x1 = (px==(n-1))?(Nx+2):(Nx+1);
-  y0 = (py==0)?(0):(1);
-  y1 = (py==(n-1))?(My+2):(My+1);
   rc = VALUE_CHARS*(x+2) + 1;
   fc = rc*(y+2);
   fs = fc*4 + rc*2;
@@ -168,7 +166,7 @@ void writeOutput(
   {
     int ints[NUM_INTEGERS];
     double doubles[NUM_DOUBLES];
-    makeIntegers(c,vl,ints);
+    makeIntegers(c,vl,g,ints);
     makeDoubles(c,vl,s,doubles);
     o = fc*4;
     writeIntegers(file,o,x,ints);

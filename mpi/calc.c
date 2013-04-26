@@ -22,37 +22,37 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   int px,py;  //position of the cell
   int i;
   int dest_rank;
-  double *send_column1,*send_column_1,*rec_column1,*rec_column_1;
+  double *send_right,*send_left,*recv_right,*recv_left;
   MPI_Request request[8];
   px= g->px;
   py= g->py;
 
   /*
      Tags used for SENDING boundaries:
-
-     -----2-----
-  Y^ |          |
+        T
+   Y -----2-----
+   ^ |          |
    | |          |
-   | 3          1
+L  | 3          1  R
      |          |
      |          |
    0 -----0------
-     0      ---> X */
+     0  B   ---> X */
 
-  ALLOCATE(send_column1,My);
-  ALLOCATE(send_column_1,My);
-  ALLOCATE(rec_column1,My);
-  ALLOCATE(rec_column_1,My);
+  ALLOCATE(send_right,My);
+  ALLOCATE(send_left ,My);
+  ALLOCATE(recv_right,My);
+  ALLOCATE(recv_left ,My);
 
   dest_rank=pxpy2rank(px+1,py,g);
   if(dest_rank!=-1)
   { //receive right boundary from right processor or previous
     for(i=1;i<=My;i++)
     { //send right column to right processor 
-      send_column1[i-1]=b[i][Nx];
+      send_right[i-1]=b[i][Nx];
     }
-    MPI_Isend(send_column1,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[0]);
-    MPI_Irecv(rec_column1 ,My,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[1]);
+    MPI_Isend(send_right,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[0]);
+    MPI_Irecv(recv_right,My,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[1]);
   }
   else
   {
@@ -66,10 +66,10 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   { //receive left boundary from left processor or previous
     for(i=1;i<=My;i++)
     { //send left column to left processor
-      send_column_1[i-1]=b[i][1];
+      send_left[i-1]=b[i][1];
     }
-    MPI_Isend(send_column_1,My,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[2]);
-    MPI_Irecv(rec_column_1 ,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[3]);
+    MPI_Isend(send_left,My,MPI_DOUBLE,dest_rank,3,MPI_COMM_WORLD,&request[2]);
+    MPI_Irecv(recv_left,My,MPI_DOUBLE,dest_rank,1,MPI_COMM_WORLD,&request[3]);
   }
   else
   {
@@ -113,15 +113,15 @@ void mpi_copy_boundaries(int Nx, int My, field a, field b, grid* g)
   //copy the columns where they belong
   if (pxpy2rank(px+1,py,g) != -1)
     for(i=1;i<=My;i++)
-      b[i][Nx+1] = rec_column1[i-1];
+      b[i][Nx+1] = recv_right[i-1];
   if (pxpy2rank(px-1,py,g) != -1)
     for(i=1;i<=My;i++)
-      b[i][0] = rec_column_1[i-1];
+      b[i][0] = recv_left[i-1];
 
-  deallocate(send_column_1);
-  deallocate(rec_column_1);
-  deallocate(send_column1);
-  deallocate(rec_column1);
+  deallocate(send_right);
+  deallocate(recv_right);
+  deallocate(send_left);
+  deallocate(recv_left);
 }
 
 static double fieldMaxDifference(int Nx,int My,field A, field B)
