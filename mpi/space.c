@@ -10,9 +10,6 @@ static void linspace(const double min, const double max,
   *dx = (max-min)/(tx+1);
   for (i=0; i < Nx+2; ++i)
     x[i] = (i+start)*(*dx) + min;
-  printf("%d linspace %d\n",parallelRank(),Nx+2);
-  for (i=0; i < Nx+2; ++i)
-    printf("%d x[%d]=%f\n",parallelRank(),i+start,x[i]);
 }
 
 void initSpace(config* c, grid* g, space* s)
