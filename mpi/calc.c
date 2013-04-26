@@ -178,7 +178,7 @@ static int setBoundaries(
   const double f=sin(2*PI*freq*t);
   double dyy = d->dysq;
   // Upper and Lower BCs
-  if(px==0)
+  if(py==0)
   {
     x_end_jet=c->Xmin+dx*(ib-1);
     past_jet_val=(-c0*(-0.5*amewa*sqrt(SQUARE(amewa)+1)-0.5*sinh(amewa)
@@ -200,7 +200,7 @@ static int setBoundaries(
           -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
     }
   }
-  if(px==n)
+  if(py==m-1)
   {
     for(j=0; j<Nx+2; ++j) {
       Omega[My+1][j]=0;
@@ -210,7 +210,7 @@ static int setBoundaries(
     }
   }
   // Side BCs
-  if(py==0)
+  if(px==0)
   {
     for(i=1; i<My+1; ++i) {
       if(start_y+i<IBL) {
@@ -226,7 +226,7 @@ static int setBoundaries(
       }
     }
   }
-  if(py==m-1)
+  if(px==n-1)
   {
     for(i=1; i<My+1; ++i) {
       if(start_y+i<IBL) {
@@ -445,17 +445,6 @@ static void maxDiffCalc(
   vl->Psi_tol = fieldMaxDifference(Nx,My,f->Psi,f->Psi0);
 }
 
-static void printField(int Nx, int My, field f)
-{
-  int i,j;
-  for (i=0; i < My+2; ++i)
-  {
-    for (j=0; j < Nx+2; ++j)
-      printf("%30.13e",f[i][j]);
-    printf("\n");
-  }
-}
-
 void oneTimeStep(
     config* c,
     space* s,
@@ -465,10 +454,8 @@ void oneTimeStep(
     vol* v)
 {
   omegaCalc(c,f,d,g);
-  printField(c->Nx,c->My,f->Omega);
   psiCalc(c,f,d,v,g);
   setBoundaries(c,s,v->time,f,d,g);
-  printField(c->Nx,c->My,f->Omega);
   velocityCalc(c,f,d,g);
   maxDiffCalc(c,f,g,v);
 }
