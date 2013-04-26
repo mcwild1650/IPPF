@@ -23,4 +23,10 @@ void zero_out(void* p, size_t s);
 #define MAX(a,b) (((b)>(a))?(b):(a))
 #define MIN(a,b) (((b)<(a))?(b):(a))
 
+#ifdef DEBUG
+#define debug(x) {fprintf(stderr,"FILE: %s LINE: %d RANK: %d STATE: %s\n",__FILE__, __LINE__,parallelRank(),x);}
+#else
+#define debug(x) ((void)0)
+#endif
+
 #endif
