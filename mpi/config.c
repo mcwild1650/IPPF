@@ -88,6 +88,8 @@ void readConfig(const char* filename, config* c)
   if (parallelRank()==0)
   {
     FILE* file = fopen(filename,"r");
+    if (!file)
+      die("couldn't open config file");
     fscanf(file,"Nx %d\n",&(c->Nx));
     fscanf(file,"My %d\n",&(c->My));
     fscanf(file,"Reynolds Number %lf\n",&(c->Re));

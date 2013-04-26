@@ -43,10 +43,11 @@ static void writeField(
 static void makeIntegers(
     config* c,
     vol* v,
+    grid* g,
     int* ints)
 {
-  ints[0] = c->Nx+2;
-  ints[1] = c->My+2;
+  ints[0] = g->x+2;
+  ints[1] = g->y+2;
   ints[2] = v->step;
   ints[3] = 0; //???
   ints[4] = c->IBL;
@@ -165,7 +166,7 @@ void writeOutput(
   {
     int ints[NUM_INTEGERS];
     double doubles[NUM_DOUBLES];
-    makeIntegers(c,vl,ints);
+    makeIntegers(c,vl,g,ints);
     makeDoubles(c,vl,s,doubles);
     o = fc*4;
     writeIntegers(file,o,x,ints);
