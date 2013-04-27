@@ -180,9 +180,13 @@ static int setBoundaries(
   // Upper and Lower BCs
   if(px==0)
   {
-    x_end_jet=c->Xmin+dx*(ib-1);
-    past_jet_val=(-c0*(-0.5*amewa*sqrt(SQUARE(amewa)+1)-0.5*sinh(amewa)
+    debug("copying bottom boundaries");
+    if(jet->exists)
+    {
+      x_end_jet=c->Xmin+dx*(ib-1);
+      past_jet_val=(-c0*(-0.5*amewa*sqrt(SQUARE(amewa)+1)-0.5*sinh(amewa)
                  +0.5*x_end_jet*sqrt(SQUARE(x_end_jet)+1)+0.5*sinh(x_end_jet)))*f;
+    }
     for(j=0; j<Nx+2; ++j) {
       Psi[0][j]=0;
       if(start_x+j>=ia-1 && start_x+j<=ib-1)
@@ -200,8 +204,9 @@ static int setBoundaries(
           -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
     }
   }
-  if(px==n)
+  if(px==n-1)
   {
+    debug("copying top boundaries");
     for(j=0; j<Nx+2; ++j) {
       Omega[My+1][j]=0;
       Psi[My+1][j]=(x[j]+A)*(y[My+1]-1);
@@ -212,6 +217,7 @@ static int setBoundaries(
   // Side BCs
   if(py==0)
   {
+    debug("copying left side boundaries");
     for(i=1; i<My+1; ++i) {
       if(start_y+i<IBL) {
         Omega[i][0]=Omega[i][1];
@@ -226,8 +232,9 @@ static int setBoundaries(
       }
     }
   }
-  if(py==m)
+  if(py==m-1)
   {
+    debug("copying right side boundaries");
     for(i=1; i<My+1; ++i) {
       if(start_y+i<IBL) {
         Omega[i][Nx+1]=Omega[i][Nx];
