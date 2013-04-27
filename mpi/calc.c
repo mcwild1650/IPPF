@@ -169,8 +169,8 @@ static int setBoundaries(
   int py=g->py;
   int m=g->m;
   int n=g->n;
-  int start_x=g->x*g->dx;
-  int start_y=g->y*g->dy;
+  int start_x=g->px*g->dx;
+  int start_y=g->py*g->dy;
   int Nx=c->Nx;
   int My=c->My;
   double past_jet_val, x_end_jet;
@@ -178,7 +178,7 @@ static int setBoundaries(
   const double f=sin(2*PI*freq*t);
   double dyy = d->dysq;
   // Upper and Lower BCs
-  if(px==0)
+  if(py==0)
   {
     debug("copying bottom boundaries");
     if(jet->exists)
@@ -204,7 +204,7 @@ static int setBoundaries(
           -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
     }
   }
-  if(px==n-1)
+  if(py==m-1)
   {
     debug("copying top boundaries");
     for(j=0; j<Nx+2; ++j) {
@@ -215,7 +215,7 @@ static int setBoundaries(
     }
   }
   // Side BCs
-  if(py==0)
+  if(px==0)
   {
     debug("copying left side boundaries");
     for(i=1; i<My+1; ++i) {
@@ -232,7 +232,7 @@ static int setBoundaries(
       }
     }
   }
-  if(py==m-1)
+  if(px==n-1)
   {
     debug("copying right side boundaries");
     for(i=1; i<My+1; ++i) {
