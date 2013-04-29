@@ -1,5 +1,6 @@
 #include "field.h"
 #include "tools.h"
+#include "stdio.h"
 #include <math.h>
 #include <assert.h>
 

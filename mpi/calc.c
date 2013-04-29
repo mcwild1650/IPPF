@@ -197,9 +197,9 @@ static int setBoundaries(
       Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy)/DMsq[0][j];
       u[0][j]=0;
       v[0][j]=0;
-      if(j>ia-1 && j<ib-1)
+      if(start_x+j>ia-1 && start_x+j<ib-1)
         v[0][j]=c0*f;
-      if(j>=ia-2 && j<=ib)
+      if(start_x+j>=ia-2 && start_x+j<=ib)
         Omega[0][j]+=(v[0][j+1]*sqrt(x[j+1]*x[j+1]+1)
           -v[0][j-1]*sqrt(x[j-1]*x[j-1]+1))/(2*dx)/DMsq[0][j];
     }

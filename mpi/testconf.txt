@@ -2,7 +2,7 @@ Nx 20
 My 8
 Reynolds Number 700
 Circulation 1.600000
-Timesteps 1
+Timesteps 2
 Report Steps 1
 dt 0.0007
 Tolerance 0.000100
