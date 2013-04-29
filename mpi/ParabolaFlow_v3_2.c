@@ -109,6 +109,7 @@ void BCs (double** Omega, double** Psi, double** u, double** v, double* x,
     const double dyy, const int Nx, const int My, const double dx,
     const double t, const int ia, const int ib, const double c0,
     const double freq);
+void binField(double** f, int My, int Nx);
 
 
 int main() {
@@ -131,53 +132,53 @@ int main() {
   time_t now;
 
   //   User Input
-  printf("\nWelcome to Parabola Flow Interactive\n\n");
-  printf("What would you like to do?\n");
-  printf("  1) Start new Simulation:\n");
-  printf("  2) Continue Previous simulation\n");
-  printf("  3) Exit\n");
+  //printf("\nWelcome to Parabola Flow Interactive\n\n");
+  //printf("What would you like to do?\n");
+  //printf("  1) Start new Simulation:\n");
+  //printf("  2) Continue Previous simulation\n");
+  //printf("  3) Exit\n");
   int index;
   scanf("%d",&index);
 
   // New Simulation
   if(index==1) {
-    printf("Nx=?\n");
+    //printf("Nx=?\n");
     scanf("%d",&Nx);
-    printf("My=?\n");
+    //printf("My=?\n");
     scanf("%d",&My);
     
     // General user inputs
-    printf("What Reynolds Number would you like to run?\n");
+    //printf("What Reynolds Number would you like to run?\n");
     scanf("%lf",&Re);
-    printf("What value of circulation parameter (A-Tilde),\n");
-    printf("would you like to use?\n");
+    //printf("What value of circulation parameter (A-Tilde),\n");
+    //printf("would you like to use?\n");
     scanf("%lf",&A);
-    printf("How many time steps would you like to run?\n");
+    //printf("How many time steps would you like to run?\n");
     scanf("%d",&Ot);
-    printf("How many time steps between reports?\n");
+    //printf("How many time steps between reports?\n");
     scanf("%d",&report);
-    printf("dt = ?\n");
+    //printf("dt = ?\n");
     scanf("%lf",&dt);
-    printf("To what tolerance level would you like to iterate?\n");
+    //printf("To what tolerance level would you like to iterate?\n");
     scanf("%lf",&Tol);
-    printf("There are %12d grid lines in the vertical direction.\n",My);
-    printf("How many do you want to be treated with,\n");
-    printf("Boundary Layer BCs?\n");
+    //printf("There are %12d grid lines in the vertical direction.\n",My);
+    //printf("How many do you want to be treated with,\n");
+    //printf("Boundary Layer BCs?\n");
     scanf("%d",&IBL);
 
     // User input for synthetic jets
-    printf("Would you like to include a jet in the simulation? (y/n)\n");
+    //printf("Would you like to include a jet in the simulation? (y/n)\n");
     char index2[45];
     scanf("%s",index2);
     if(index2[0]=='y') {
-      printf("What is the start location of the jet?\n");
-      printf("Range of 1 to %d\n",Nx);
+      //printf("What is the start location of the jet?\n");
+      //printf("Range of 1 to %d\n",Nx);
       scanf("%d",&ia);
-      printf("What is the end location?\n");
+      //printf("What is the end location?\n");
       scanf("%d",&ib);
-      printf("What is the amplitude of the jet?\n");
+      //printf("What is the amplitude of the jet?\n");
       scanf("%lf",&c0);
-      printf("What is the frequency of the jet?\n");
+      //printf("What is the frequency of the jet?\n");
       scanf("%lf",&freq);
     }
     else {
@@ -188,10 +189,10 @@ int main() {
     }
 
     // Additional user input
-    printf("What would you like to call the output file?\n");
+    //printf("What would you like to call the output file?\n");
     scanf("%s",filename);
-    printf("How many iterations between incremental file writes?\n");
-    printf("(use -1 to turn off incremental save)\n");
+    //printf("How many iterations between incremental file writes?\n");
+    //printf("(use -1 to turn off incremental save)\n");
     scanf("%d",&psave);
 
     // Allocates arrays based on user defined mesh sizes
@@ -256,11 +257,11 @@ int main() {
     alpha=2*alphaX+2*alphaY;
 
     // Check stability
-    printf("The Courant Number C = %22.14le Must be less than 1\n\n",C);
-    printf("The Cell Reynolds Number Rc = %20.14lf\n",Rc);
-    printf("MUST BE LESS THAN 4/C = %20.14lf\n\n",4/C);
-    printf("Grid Spacing dx = %20.14le, dy = %20.14le\n",dx,dy);
-    printf("Continue? (y/n)\n");
+    //printf("The Courant Number C = %22.14le Must be less than 1\n\n",C);
+    //printf("The Cell Reynolds Number Rc = %20.14lf\n",Rc);
+    //printf("MUST BE LESS THAN 4/C = %20.14lf\n\n",4/C);
+    //printf("Grid Spacing dx = %20.14le, dy = %20.14le\n",dx,dy);
+    //printf("Continue? (y/n)\n");
     scanf("%s",index2);
 
     if(index2[0]!='y')
@@ -281,18 +282,18 @@ int main() {
       Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
     }
     time(&now);
-    printf("\nFlow-field finished initializing at %s\n",ctime(&now));
+    //printf("\nFlow-field finished initializing at %s\n",ctime(&now));
     k=0;
   }
 
   // Continuing a Simulation
   else if(index==2) {
-    printf("Enter the Previous Simulation File Name:\n");
+    //printf("Enter the Previous Simulation File Name:\n");
     char data[45];
     scanf("%s",data);
     FILE* f_in=fopen(data,"r");
     if(f_in==NULL) {
-      printf("Error, file %s could not be opened for read.\n",data);
+      //printf("Error, file %s could not be opened for read.\n",data);
       return 0;
     }
     // Determine mesh size by looking back two lines from EOF
@@ -361,55 +362,55 @@ int main() {
       A=OutDP[11];
 
       // Print previous simulation parameters
-      printf("\nThis file is compatible.\n\n");
-      printf("The number of points in the x direction, Nx = %d\n",Nx);
-      printf("The number of points in the y direction, My = %d\n",My);
-      printf("The Reynolds number, Re = %22.14le\n",Re);
-      printf("The circulation parameter, A = %22.14le\n",A);
-      printf("The number of grid lines treated with boundary layer ");
-      printf("BCs, IBL = %d\n",IBL);
-      printf("The time step size, dt = %22.14le\n",dt);
-      printf("The tolerance value, Tol = %22.14le\n\n",Tol);
-      printf("Would you like to change any of the simulation ");
-      printf("parameters? (y/n)\n");
+      //printf("\nThis file is compatible.\n\n");
+      //printf("The number of points in the x direction, Nx = %d\n",Nx);
+      //printf("The number of points in the y direction, My = %d\n",My);
+      //printf("The Reynolds number, Re = %22.14le\n",Re);
+      //printf("The circulation parameter, A = %22.14le\n",A);
+      //printf("The number of grid lines treated with boundary layer ");
+      //printf("BCs, IBL = %d\n",IBL);
+      //printf("The time step size, dt = %22.14le\n",dt);
+      //printf("The tolerance value, Tol = %22.14le\n\n",Tol);
+      //printf("Would you like to change any of the simulation ");
+      //printf("parameters? (y/n)\n");
       char index2[45];
       scanf("%s",index2);
 
       if(index2[0]=='y') {
-  printf("What value of circulation parameter, ");
-  printf("(A-Tilde) would you like to use?\n");
+  //printf("What value of circulation parameter, ");
+  //printf("(A-Tilde) would you like to use?\n");
   scanf("%lf",&A);
-  printf("How many grid lines do you want to ");
-  printf("be treated with Boundary Layer BCs?\n");
+  //printf("How many grid lines do you want to ");
+  //printf("be treated with Boundary Layer BCs?\n");
   scanf("%d",&IBL);
-  printf("\nInput a new Tolerance value equal or less than %22.14le\n",
-         Tol);
+  //printf("\nInput a new Tolerance value equal or less than %22.14le\n",
+         //Tol);
   scanf("%lf",&Tol);
-  printf("\nCurrently dt = %22.14le\n",dt);
-  printf("What value of time step (dt) would you like to use?\n");
+  //printf("\nCurrently dt = %22.14le\n",dt);
+  //printf("What value of time step (dt) would you like to use?\n");
   scanf("%lf",&dt);
       }
 
       // Print previous jet parameters
       if(OutDP[13]>0) {
-  printf("\nThere is a jet in the simulation.\n");
-  printf("The start location, ia = %d\n",OutIN[5]);
-  printf("The end location, ib = %d\n",OutIN[6]);
-  printf("The amplitude, c0 = %lf\n",OutDP[13]);
-  printf("The frequency, freq = %lf\n\n",OutDP[12]);
+  //printf("\nThere is a jet in the simulation.\n");
+  //printf("The start location, ia = %d\n",OutIN[5]);
+  //printf("The end location, ib = %d\n",OutIN[6]);
+  //printf("The amplitude, c0 = %lf\n",OutDP[13]);
+  //printf("The frequency, freq = %lf\n\n",OutDP[12]);
       }
-      else printf("There is no jet in the simulation\n");
-      printf("Would you like to change the jet parameters? (y/n)\n");
+      //else printf("There is no jet in the simulation\n");
+      //printf("Would you like to change the jet parameters? (y/n)\n");
       scanf("%s",index2);
       if(index2[0]=='y') {
-  printf("What is the new start location of the jet?\n");
-  printf("Max of %d\n",Nx);
+  //printf("What is the new start location of the jet?\n");
+  //printf("Max of %d\n",Nx);
   scanf("%d",&ia);
-  printf("What is the new end location?\n");
+  //printf("What is the new end location?\n");
   scanf("%d",&ib);
-  printf("What is the new amplitude of the jet?\n");
+  //printf("What is the new amplitude of the jet?\n");
   scanf("%lf",&c0);
-  printf("What is the new frequency of the jet?\n");
+  //printf("What is the new frequency of the jet?\n");
   scanf("%lf",&freq);
       }
       else {
@@ -455,32 +456,32 @@ int main() {
       alpha=2*alphaX+2*alphaY;
 
       // Additional user input
-      printf("There have been %d time steps for this model.\n",k);
-      printf("How many more would you like to perform?\n");
+      //printf("There have been %d time steps for this model.\n",k);
+      //printf("How many more would you like to perform?\n");
       int Iter;
       scanf("%d",&Iter);
       Ot=Iter+k;
-      printf("How many time steps between reports?\n");
+      //printf("How many time steps between reports?\n");
       scanf("%d",&report);
-      printf("What would you like to call the output file?\n");
+      //printf("What would you like to call the output file?\n");
       scanf("%s",filename);
-      printf("How many iterations between incremental file writes?\n");
-      printf("(use -1 to turn off incremental save)\n");
+      //printf("How many iterations between incremental file writes?\n");
+      //printf("(use -1 to turn off incremental save)\n");
       scanf("%d",&psave);
 
       // Check stability
-      printf("The Courant Number C = %22.14le Must be less than 1\n\n",C);
-      printf("The Cell Reynolds Number Rc = %20.14lf\n",Rc);
-      printf("MUST BE LESS THAN 4/C = %20.14lf\n\n",4/C);
-      printf("Grid Spacing dx = %20.14le, dy = %20.14le\n",dx,dy);
-      printf("Continue to %d time steps? (y/n)\n",Ot);
+      //printf("The Courant Number C = %22.14le Must be less than 1\n\n",C);
+      //printf("The Cell Reynolds Number Rc = %20.14lf\n",Rc);
+      //printf("MUST BE LESS THAN 4/C = %20.14lf\n\n",4/C);
+      //printf("Grid Spacing dx = %20.14le, dy = %20.14le\n",dx,dy);
+      //printf("Continue to %d time steps? (y/n)\n",Ot);
       scanf("%s",index2);
       if(index2[0]!='y')
   return 0;
     }
     else {
-      printf("This file is not compatible.\n");
-      printf("Exit to check file format\n\n");
+      //printf("This file is not compatible.\n");
+      //printf("Exit to check file format\n\n");
       return 0;
     }
     fclose(f_in);
@@ -551,7 +552,7 @@ int main() {
       tic1=0;
       char outfile[45];
       sprintf(outfile,"%sP%03d",filename,++ct);
-      printf("Writing Incremental File %s ",outfile);
+      //printf("Writing Incremental File %s ",outfile);
 
       for(j=0; j<Nx+2; ++j) {
   OutIN[j]=0;
@@ -582,26 +583,26 @@ int main() {
       OutDP[13]=c0;
 
       if(writeFile(Omega,Psi,u,v,OutIN,OutDP,Nx,My,outfile)==-1) {
-  printf("Error, file %s could not be opened for write.\n",outfile);
+  //printf("Error, file %s could not be opened for write.\n",outfile);
   return 0;
       }
 
       time(&now);
-      printf("%s\n",ctime(&now));
+      //printf("%s\n",ctime(&now));
     }
 
     // Print Report
     if(++tic2==report) {
       tic2=0;
       time(&now);
-      printf("%d %d %22.14le %22.14le %s\n",
-       k,KPsi,OmTol,PsiTol,ctime(&now));
+      //printf("%d %d %22.14le %22.14le %s\n",
+       //k,KPsi,OmTol,PsiTol,ctime(&now));
     }
   }
 
   // Writes Final Output File
   strcpy(outfile,filename);
-  printf("Writing output file ");
+  //printf("Writing output file ");
   for(j=0; j<Nx+2; ++j) {
     OutIN[j]=0;
     OutDP[j]=0;
@@ -631,12 +632,12 @@ int main() {
   OutDP[13]=c0;
 
   if(writeFile(Omega,Psi,u,v,OutIN,OutDP,Nx,My,outfile)==-1) {
-    printf("Error, file %s could not be opened for write.\n",outfile);
+    //printf("Error, file %s could not be opened for write.\n",outfile);
     return 0;
   }
 
   time(&now);
-  printf("%s\n",ctime(&now));
+  //printf("%s\n",ctime(&now));
 
   for(i=0; i<My+2; ++i) {
     free(Omega[i]);
@@ -737,6 +738,10 @@ int writeFile(double** Omega, double** Psi, double** u,double** v, int* OutIN,
   if(f_out==NULL)
     return -1;
 
+  binField(Omega,My,Nx);
+  binField(Psi,My,Nx);
+  binField(u,My,Nx);
+  binField(v,My,Nx);
   for(i=0; i<My+2; ++i) {
     for(j=0; j<Nx+2; ++j)
       fprintf(f_out,"%30.13le",Omega[i][j]);
@@ -829,5 +834,18 @@ void BCs (double** Omega, double** Psi, double** u, double** v, double* x,
       u[i][Nx+1]=(x[Nx+1]+A)/DM[i][Nx+1];
       v[i][Nx+1]=-(y[i]-1)/DM[i][Nx+1];
     }
+  }
+}
+
+void binField(double** f, int My, int Nx)
+{
+  int i,j;
+  for(i=0;i<My+2;++i)
+  {
+    for(j=0;j<Nx+2;++j)
+    {
+      printf("%a",f[i][j]);
+    }
+    printf("\n");
   }
 }

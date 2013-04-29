@@ -1,5 +1,6 @@
 #include "field.h"
 #include "tools.h"
+#include "stdio.h"
 #include <math.h>
 #include <assert.h>
 
@@ -34,6 +35,19 @@ void testFieldSanity(field f, int My,int Nx)
   for(j=0;j<Nx+2;++j)
   {
     testDoubleSanity(f[i][j]);
+  }
+}
+
+void binField(field f, int My, int Nx)
+{
+  int i,j;
+  for(i=0;i<My+2;++i)
+  {
+    for(j=0;j<Nx+2;++j)
+    {
+      printf("%a",f[i][j]);
+    }
+    printf("\n");
   }
 }
 

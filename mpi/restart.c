@@ -149,6 +149,10 @@ void writeOutput(
   char* fn = c->filename;
   int eol;
   MPI_File_open(MPI_COMM_WORLD,fn,amode,MPI_INFO_NULL,&file);
+  binField(f->Omega,c->My,c->Nx);
+  binField(f->Psi,c->My,c->Nx);
+  binField(f->u,c->My,c->Nx);
+  binField(f->v,c->My,c->Nx);
   rc = VALUE_CHARS*(x+2) + 1;
   fc = rc*(y+2);
   fs = fc*4 + rc*2;

@@ -6,10 +6,10 @@ Timesteps 1
 Report Steps 1
 dt 0.0007
 Tolerance 0.000100
-Boundary Layer 20
+Boundary Layer 2
 Jet 1
-Jet Start 103
-Jet End 107
+Jet Start 8
+Jet End 10
 Jet Amplitude .01
 Jet Frequency .05
 Filename out.dat
