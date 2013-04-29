@@ -25,6 +25,5 @@ typedef struct {
 void makeFields(fields* f, int x, int y);
 void freeFields(fields* f);
 void testFieldSanity(field f, int My,int Nx);
-void binField(field f, int My, int Nx);
 
 #endif

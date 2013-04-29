@@ -38,19 +38,6 @@ void testFieldSanity(field f, int My,int Nx)
   }
 }
 
-void binField(field f, int My, int Nx)
-{
-  int i,j;
-  for(i=0;i<My+2;++i)
-  {
-    for(j=0;j<Nx+2;++j)
-    {
-      printf("%a",f[i][j]);
-    }
-    printf("\n");
-  }
-}
-
 void makeFields(fields* f, int x, int y)
 {
   int x2 = x+2;

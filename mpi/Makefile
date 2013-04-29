@@ -20,7 +20,7 @@ clean:
 
 test: ippf serial
 	rm -f good.dat out.dat
-	./ippf run testconf.txt >out1
+	mpirun -np 2 ./ippf run testconf.txt >out1
 	./serial < testin.txt >out2
 	diff good.dat out.dat
 	diff out1 out2
