@@ -25,12 +25,27 @@ void partition(config* c, grid* g)
   int maxx = MIN(p,x);
   int maxy = MIN(p,y);
   int m,n;
+  int rank = parallelRank();
   for (m=1; m <= maxy; ++m)
   for (n=1; n <= maxx; ++n)
     if (m*n == p)
     {
+      if (!rank)
+        fprintf(stderr,"part %dX%d\n",n,m);
       int dx = ceildiv(x,n);
+      if ((n*dx-x) > dx)
+      {
+        if (!rank)
+          fprintf(stderr,"partX %d > %d\n",(n*dx-x),dx);
+        continue;
+      }
       int dy = ceildiv(y,m);
+      if ((m*dy-y) > dy)
+      {
+        if (!rank)
+          fprintf(stderr,"partY %d > %d\n",(m*dy-y),dy);
+        continue;
+      }
       int comm=(m-1)*x + (n-1)*y;
       int comp=dx*dy;
       if ((comm <= min_comm)&&
@@ -52,7 +67,12 @@ void partition(config* c, grid* g)
   g->dy = ceildiv(y,good_m);
   g->lastx = x -((g->n-1) * g->dx);
   g->lasty = y -((g->m-1) * g->dy);
-  int rank = parallelRank();
+  if (!rank)
+  {
+    printf("partition %dx%d\n",g->n,g->m);
+    printf("subgrid %dx%d\n",g->dx,g->dy);
+    printf("margin %dx%d\n",g->lastx,g->lasty);
+  }
   g->py = rank/(g->n);
   g->px = rank%(g->n);
   if (g->py == g->m-1)
@@ -67,4 +87,5 @@ void partition(config* c, grid* g)
   g->x1 = (g->px == g->n-1)?(c->Nx+2):(c->Nx+1);
   g->y0 = (g->py == 0)?(0):(1);
   g->y1 = (g->py == g->m-1)?(c->My+2):(c->My+1);
+  printf("rank %d is [%d,%d]X[%d,%d]\n",rank,g->x0,g->x1,g->y0,g->y1);
 }
