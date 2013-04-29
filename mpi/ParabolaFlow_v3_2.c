@@ -110,6 +110,7 @@ void BCs (double** Omega, double** Psi, double** u, double** v, double* x,
     const double t, const int ia, const int ib, const double c0,
     const double freq);
 
+
 int main() {
 
   const double Xmin=-20, Xmax=20, Ymin=1, Ymax=11;
@@ -517,12 +518,10 @@ int main() {
 
     // Omega and Psi Calculations
     OmegaCalc(Nx,My,Cx2,Cy2,alpha,alphaX,alphaY,Omega,Omega0,u,v,DM,DM2);
-  //printField(Nx,My,Omega);
     PsiCalc(Nx,My,Kappa2,KappaA,dxx,&Psi,&Psi0i,Omega,DM2,&KPsi,Tol);
 
     // Boundary Conditions
     t=k*dt;
-    printf("k*dt=%d*%a=t=%a\n",k,dt,t);
     BCs(Omega,Psi,u,v,x,y,DM,DM2,A,IBL,dyy,Nx,My,dx,t,ia,ib,c0,freq);
 
     // Calculate velocities
