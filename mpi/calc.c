@@ -152,7 +152,7 @@ static int setBoundaries(
   int ia = jet->ia;
   int ib = jet->ib;
   double c0 = jet->c0;
-  double freq = jet->ia;
+  double freq = jet->freq;
   int total_x = g->x;
   double A = c->A;
   int IBL = c->IBL;
@@ -191,7 +191,7 @@ static int setBoundaries(
       Psi[0][j]=0;
       if(start_x+j>=ia-1 && start_x+j<=ib-1)
         Psi[0][j]=(-c0*(-0.5*amewa*sqrt(SQUARE(amewa)+1)-0.5*sinh(amewa)
-            +0.5*x[j]*sqrt(x[j]*x[j]+1)+0.5*sinh(x[j])))*f;
+            +0.5*x[j]*sqrt(SQUARE(x[j])+1)+0.5*sinh(x[j])))*f;
       if(start_x+j>ib-1)
         Psi[0][j]=past_jet_val;
       Omega[0][j]=(7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy)/DMsq[0][j];
@@ -461,6 +461,7 @@ void oneTimeStep(
     vol* v)
 {
   omegaCalc(c,f,d,g);
+//printField(c->Nx,c->My,f->Omega);
   psiCalc(c,f,d,v,g);
   setBoundaries(c,s,v->time,f,d,g);
   velocityCalc(c,f,d,g);
@@ -477,9 +478,9 @@ void calculate(
 {
   for (; v->step < c->Ot; ++(v->step))
   {
+    v->time += c->dt;
     swapFields(&(f->Psi),&(f->Psi0));
     swapFields(&(f->Omega),&(f->Omega0));
     oneTimeStep(c,s,g,f,d,v);
-    v->time += c->dt;
   }
 }
