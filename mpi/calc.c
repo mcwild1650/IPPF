@@ -124,13 +124,13 @@ L  | 3          1  R
   deallocate(recv_left);
 }
 
-static double fieldMaxDifference(int Nx,int My,field A, field B)
+static double fieldMaxDifference(grid* g,field A, field B)
 {
   int i,j;
   double local_diff=0;
   double global_diff;
-  for(i=0;i<My+2;++i)
-  for(j=0;j<Nx+2;++j)
+  for(i=g->y0;i<g->y1;++i)
+  for(j=g->x0;j<g->x1;++j)
   {
     if(fabs(A[i][j]-B[i][j])>local_diff)
       local_diff=fabs(A[i][j]-B[i][j]);
@@ -304,7 +304,7 @@ static double onePsiCalc(
           Kappasq*(Psi0[i+1][j]+
                    Psi0[i-1][j]));
   mpi_copy_boundaries(Nx,My,Psi0,Psi,g);
-  return fieldMaxDifference(Nx,My,Psi0,Psi);
+  return fieldMaxDifference(g,Psi0,Psi);
 }
 
 static void psiCalc(
@@ -446,10 +446,8 @@ static void maxDiffCalc(
     grid* g,
     vol* vl)
 {
-  int Nx=c->Nx;
-  int My=c->My;
-  vl->Omega_tol = fieldMaxDifference(Nx,My,f->Omega,f->Omega0);
-  vl->Psi_tol = fieldMaxDifference(Nx,My,f->Psi,f->Psi0);
+  vl->Omega_tol = fieldMaxDifference(g,f->Omega,f->Omega0);
+  vl->Psi_tol = fieldMaxDifference(g,f->Psi,f->Psi0);
 }
 
 void oneTimeStep(
