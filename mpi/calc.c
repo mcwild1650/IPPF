@@ -274,6 +274,8 @@ static void velocityCalc(
     u[i][j]= (Psi[i+1][j]-Psi[i-1][j])/dy2/DM[i][j];
     v[i][j]=-(Psi[i][j+1]-Psi[i][j-1])/dx2/DM[i][j];
   }
+  mpi_copy_boundaries(Nx,My,u,u,g);
+  mpi_copy_boundaries(Nx,My,v,v,g);
 }
 
 static double onePsiCalc(
@@ -459,7 +461,6 @@ void oneTimeStep(
     vol* v)
 {
   omegaCalc(c,f,d,g);
-//printField(c->Nx,c->My,f->Omega);
   psiCalc(c,f,d,v,g);
   setBoundaries(c,s,v->time,f,d,g);
   velocityCalc(c,f,d,g);
