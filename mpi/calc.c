@@ -82,7 +82,7 @@ L  | 3          1  R
   if(dest_rank!=-1)
   {
     //send bottom row to below processor
-    MPI_Isend(&b[1][1],Nx,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[6]);
+    MPI_Isend(&b[1][1],Nx,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[4]);
     //receive bottom boundary from below processor or previous
     MPI_Irecv(&b[0][1],Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[5]);
   }
@@ -97,7 +97,7 @@ L  | 3          1  R
   if(dest_rank!=-1)
   {
     //send top row to above processor
-    MPI_Isend(&b[My][1]  ,Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[4]);
+    MPI_Isend(&b[My][1]  ,Nx,MPI_DOUBLE,dest_rank,2,MPI_COMM_WORLD,&request[6]);
     //receive top boundary from above processor or previous
     MPI_Irecv(&b[My+1][1],Nx,MPI_DOUBLE,dest_rank,0,MPI_COMM_WORLD,&request[7]);
   }
@@ -318,12 +318,15 @@ static void psiCalc(
 {
   int Psi_k;
   double Tol = c->Tol;
+  printf("init PsiTol %a Tl %a\n",1.0,Tol);
   double Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0,d,g);
+  printf("iter PsiTol %a Tl %a\n",Psi_tol,Tol);
   Psi_k = 1;
   while (Psi_tol > Tol) {
      swapFields(&(f->Psi),&(f->Psi0i));
      Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0i,d,g);
      ++(Psi_k);
+     printf("iter PsiTol %a Tl %a\n",Psi_tol,Tol);
   }
   vl->Psi_k=Psi_k;
   vl->Psi_tol=Psi_tol;
@@ -461,7 +464,11 @@ void oneTimeStep(
     vol* v)
 {
   omegaCalc(c,f,d,g);
+  if (!parallelRank())
+    printf("before psicalc Psi0 %a\n",f->Psi0[1][1]);
   psiCalc(c,f,d,v,g);
+  if (!parallelRank())
+    printf("after psicalc Psi %a\n",f->Psi[1][1]);
   setBoundaries(c,s,v->time,f,d,g);
   velocityCalc(c,f,d,g);
   maxDiffCalc(c,f,g,v);

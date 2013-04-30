@@ -518,7 +518,9 @@ int main() {
 
     // Omega and Psi Calculations
     OmegaCalc(Nx,My,Cx2,Cy2,alpha,alphaX,alphaY,Omega,Omega0,u,v,DM,DM2);
+    printf("before psicalc Psi0 %a\n",Psi0[1][1]);
     PsiCalc(Nx,My,Kappa2,KappaA,dxx,&Psi,&Psi0i,Omega,DM2,&KPsi,Tol);
+    printf("after psicalc Psi %a\n",Psi[1][1]);
 
     // Boundary Conditions
     t=k*dt;
@@ -706,6 +708,7 @@ void PsiCalc(const int Nx, const int My, const double Kappa2,
 
   *KPsi=0;
 
+  printf("init PsiTol %a Tl %a\n",PsiTol,Tol);
   while(PsiTol>Tol) {
     ++*KPsi;
     PsiTol=0;
@@ -724,6 +727,7 @@ void PsiCalc(const int Nx, const int My, const double Kappa2,
         if(fabs((*Psi)[i][j]-(*Psi0i)[i][j])>PsiTol)
           PsiTol=fabs((*Psi)[i][j]-(*Psi0i)[i][j]);
       }
+    printf("iter PsiTol %a Tl %a\n",PsiTol,Tol);
   }
 }
 
