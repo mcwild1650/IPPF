@@ -49,8 +49,6 @@ void partition(config* c, grid* g)
     }
   if ((!good_m)||(!good_n))
     die("failed to partition\n");
-  if (!rank)
-    printf("partition: %d by %d\n",good_n,good_m);
   g->x = x;
   g->y = y;
   g->n = good_n;
@@ -73,5 +71,4 @@ void partition(config* c, grid* g)
   g->x1 = (g->px == g->n-1)?(c->Nx+2):(c->Nx+1);
   g->y0 = (g->py == 0)?(0):(1);
   g->y1 = (g->py == g->m-1)?(c->My+2):(c->My+1);
-  fprintf(stderr,"rank %d is [%d,%d]X[%d,%d]\n",rank,g->x0,g->x1,g->y0,g->y1);
 }

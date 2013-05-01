@@ -318,15 +318,12 @@ static void psiCalc(
 {
   int Psi_k;
   double Tol = c->Tol;
-  printf("init PsiTol %a Tl %a\n",1.0,Tol);
   double Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0,d,g);
-  printf("iter PsiTol %a Tl %a\n",Psi_tol,Tol);
   Psi_k = 1;
   while (Psi_tol > Tol) {
      swapFields(&(f->Psi),&(f->Psi0i));
      Psi_tol = onePsiCalc(c,f,f->Psi,f->Psi0i,d,g);
      ++(Psi_k);
-     printf("iter PsiTol %a Tl %a\n",Psi_tol,Tol);
   }
   vl->Psi_k=Psi_k;
   vl->Psi_tol=Psi_tol;
@@ -425,23 +422,27 @@ void initFields(config* c, space* s, derived* d, fields* f, grid* g)
   double* y = s->y;
   double A = c->A;
   double dyy = d->dysq;
+  int py = g->py;
   for(i=0; i<My+2; ++i)
     for(j=0; j<Nx+2; ++j) {
       DM2[i][j]=SQUARE(x[j])+SQUARE(y[i]);
       DM[i][j]=sqrt(DM2[i][j]);
     }
-  for(i=1; i<My+2; ++i)
+  for(i=0; i<My+2; ++i)
     for(j=0; j<Nx+2; ++j) {
       v[i][j]=-(y[i]-1)/DM[i][j];
       u[i][j]=(x[j]+A)/DM[i][j];
       Psi[i][j]=(x[j]+A)*(y[i]-1);
       Omega[i][j]=0;
     }
-  for(j=0; j<Nx+2; ++j) {
-    v[0][j]=-(y[0]-1)/DM[0][j];
-    u[0][j]=0;
-    Psi[0][j]=(x[j]+A)*(y[0]-1);
-    Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
+  if (py == 0)
+  {
+    for(j=0; j<Nx+2; ++j) {
+      v[0][j]=-(y[0]-1)/DM[0][j];
+      u[0][j]=0;
+      Psi[0][j]=(x[j]+A)*(y[0]-1);
+      Omega[0][j]=((7*Psi[0][j]-8*Psi[1][j]+Psi[2][j])/(2*dyy))/DM2[0][j];
+    }
   }
 }
 
@@ -464,11 +465,7 @@ void oneTimeStep(
     vol* v)
 {
   omegaCalc(c,f,d,g);
-  if (!parallelRank())
-    printf("before psicalc Psi0 %a\n",f->Psi0[1][1]);
   psiCalc(c,f,d,v,g);
-  if (!parallelRank())
-    printf("after psicalc Psi %a\n",f->Psi[1][1]);
   setBoundaries(c,s,v->time,f,d,g);
   velocityCalc(c,f,d,g);
   maxDiffCalc(c,f,g,v);
