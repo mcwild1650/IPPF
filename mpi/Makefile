@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wfatal-errors
+CFLAGS=-Wall -Wfatal-errors -DCLOCK_RATE=1.6e9
 LDFLAGS=-lm
 HEADERS=config.h calc.h driver.h field.h restart.h space.h tools.h grid.h
 SRC=config.c calc.c driver.c field.c restart.c space.c tools.c grid.c

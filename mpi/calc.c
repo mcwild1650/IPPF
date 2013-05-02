@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <mpi.h>
 
+double omegaTime=0;
+double psiTime=0;
+int maxPsiIterations=0;
+
 int pxpy2rank(int px, int py, grid* g)
 {
   int n= g->n, m= g->m;
@@ -177,6 +181,7 @@ static int setBoundaries(
   const double amewa=(ia-((total_x+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dyy = d->dysq;
+
   // Upper and Lower BCs
   if(py==0)
   {
@@ -326,6 +331,8 @@ static void psiCalc(
      ++(Psi_k);
   }
   vl->Psi_k=Psi_k;
+  if (Psi_k > maxPsiIterations)
+    maxPsiIterations = Psi_k;
   vl->Psi_tol=Psi_tol;
 }
 
@@ -464,8 +471,12 @@ void oneTimeStep(
     derived* d,
     vol* v)
 {
+  startTimer();
   omegaCalc(c,f,d,g);
+  omegaTime += stopTimer();
+  startTimer();
   psiCalc(c,f,d,v,g);
+  psiTime += stopTimer();
   setBoundaries(c,s,v->time,f,d,g);
   velocityCalc(c,f,d,g);
   maxDiffCalc(c,f,g,v);
@@ -481,7 +492,7 @@ void calculate(
 {
   for (; v->step < c->Ot; ++(v->step))
   {
-    v->time += c->dt;
+    v->time = (v->step+1)* c->dt;
     swapFields(&(f->Psi),&(f->Psi0));
     swapFields(&(f->Omega),&(f->Omega0));
     oneTimeStep(c,s,g,f,d,v);

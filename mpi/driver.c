@@ -72,6 +72,8 @@ int main(int argc, char** argv)
 {
   args a;
   state s;
+  double calcTime;
+  double writeTime;
   startParallel();
   if (!getArgs(argc,argv,&a))
     return 0;
@@ -88,8 +90,20 @@ int main(int argc, char** argv)
   {
     readConfig(a.configfile,c); 
     initState(&s); 
+    startTimer();
     calculate(s.c,s.sp,s.g,s.f,s.dr,s.v);
+    calcTime = stopTimer();
+    startTimer();
     writeOutput(s.c,s.sp,s.f,s.v,s.g);
+    writeTime = stopTimer();
+    if ( ! parallelRank())
+    {
+      printf("calculation took %lf seconds\n",calcTime);
+      printf("Omega calc took %lf seconds\n",omegaTime);
+      printf("Psi calc took %lf seconds\n",psiTime);
+      printf("using at most %d iterations\n",maxPsiIterations);
+      printf("restart file IO took %lf seconds\n",writeTime);
+    }
     freeState(&s);
   }
   else if (a.m == restart_mode)

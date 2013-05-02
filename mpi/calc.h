@@ -46,4 +46,8 @@ void calculate(
     derived* d,
     vol* v);
 
+extern double omegaTime;
+extern double psiTime;
+extern int maxPsiIterations;
+
 #endif
