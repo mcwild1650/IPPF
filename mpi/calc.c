@@ -177,6 +177,7 @@ static int setBoundaries(
   const double amewa=(ia-((total_x+1)/2+1))*dx;
   const double f=sin(2*PI*freq*t);
   double dyy = d->dysq;
+
   // Upper and Lower BCs
   if(py==0)
   {
@@ -481,7 +482,7 @@ void calculate(
 {
   for (; v->step < c->Ot; ++(v->step))
   {
-    v->time += c->dt;
+    v->time = (v->step+1)* c->dt;
     swapFields(&(f->Psi),&(f->Psi0));
     swapFields(&(f->Omega),&(f->Omega0));
     oneTimeStep(c,s,g,f,d,v);
