@@ -1,0 +1,16 @@
+Nx 799
+My 1599
+Reynolds Number 700.000000
+Circulation 1.600000
+Timesteps 100000
+Report Steps 100
+dt 0.000700
+Tolerance 0.000100
+Boundary Layer 80
+Jet 1
+Jet Start 404
+Jet End 408
+Jet Amplitude 0.010000
+Jet Frequency 0.050000
+Filename bigout.dat
+Save Steps -1
