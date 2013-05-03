@@ -29,6 +29,29 @@ Han Wang
 %Micah
 \section{Parallel File IO}
 %Dan
+In order to easily verify our results using the serial code,
+we chose to implement single-file IO.
+On the other hand, we would like to get some parallelism in
+file IO so that it does not cripple scaling, so we try to use
+MPI's parallel file IO routines to write the file in parallel.
+An additional complication is that the file is in a text format
+rather than binary.
+Fortunately, the file is formatted such that all values are
+padded to a known character width, so the offset in characters
+of every value and the total file size are easily computable.
+To write our output file, we first open a file collectively
+with \texttt{MPI\_File\_open} and then 
+allocate enough characters for the whole output with
+\texttt{MPI\_File\_preallocate}.
+We use
+\texttt{sprintf} to produce a text string of know length for
+each floating-point value, and then use
+\texttt{MPI\_File\_write\_at} to write the text string at
+the correct location in the file.
+Each process computes its own offsets and writes concurrently
+without any synchronization until all processes close the file.
+This is theoretically a scalable algorithm, although in practice
+operating system and MPI limits are very likely to occur.
 \section{Results}
 \section{Future Work}
 \section{Conclusions}
