@@ -471,12 +471,13 @@ void oneTimeStep(
     derived* d,
     vol* v)
 {
-  startTimer();
+  timer calc_t;
+  startTimer(calc_t);
   omegaCalc(c,f,d,g);
-  omegaTime += stopTimer();
-  startTimer();
+  omegaTime += stopTimer(calc_t);
+  startTimer(calc_t);
   psiCalc(c,f,d,v,g);
-  psiTime += stopTimer();
+  psiTime += stopTimer(calc_t);
   setBoundaries(c,s,v->time,f,d,g);
   velocityCalc(c,f,d,g);
   maxDiffCalc(c,f,g,v);

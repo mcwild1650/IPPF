@@ -9,6 +9,9 @@ all: ippf serial
 debug:CFLAGS+=-g -DDEBUG
 debug: all
 
+release:CFLAGS+=-O2
+release: all
+
 ippf: $(SRC) $(HEADERS)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o ippf
 

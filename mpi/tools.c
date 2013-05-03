@@ -107,20 +107,17 @@ static unsigned long long rdtsc(void)
 
 #endif
 
-static unsigned long long global_timer;
-
-void startTimer(void)
+void startTimer(timer t)
 {
-  global_timer = rdtsc();
+  t = rdtsc();
 }
 
 #ifndef CLOCK_RATE
 #error "define CLOCK_RATE to 1.6e9 or something when compiling"
 #endif
 
-double stopTimer(void)
+double stopTimer(timer t)
 {
-  unsigned long long end = rdtsc();
-  return ((double)(end-global_timer))/CLOCK_RATE;
+  return ((double)(rdtsc()-t))/CLOCK_RATE;
 }
 
