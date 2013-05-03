@@ -29,7 +29,8 @@ void zero_out(void* p, size_t s);
 #define debug(x) ((void)0)
 #endif
 
-void startTimer(void);
-double stopTimer(void);
+typedef unsigned long long timer;
+void startTimer(timer t);
+double stopTimer(timer t);
 
 #endif

@@ -90,19 +90,17 @@ int main(int argc, char** argv)
   {
     readConfig(a.configfile,c); 
     initState(&s); 
-    startTimer();
+    timer calc_t;
+    startTimer(calc_t);
     calculate(s.c,s.sp,s.g,s.f,s.dr,s.v);
-    calcTime = stopTimer();
-    startTimer();
+    calcTime = stopTimer(calc_t);
+    timer write_t;
+    startTimer(write_t);
     writeOutput(s.c,s.sp,s.f,s.v,s.g);
-    writeTime = stopTimer();
+    writeTime = stopTimer(write_t);
     if ( ! parallelRank())
     {
-      printf("calculation took %lf seconds\n",calcTime);
-      printf("Omega calc took %lf seconds\n",omegaTime);
-      printf("Psi calc took %lf seconds\n",psiTime);
-      printf("using at most %d iterations\n",maxPsiIterations);
-      printf("restart file IO took %lf seconds\n",writeTime);
+      printf("%d %lf %lf %lf %d %lf\n",parallelSize(),calcTime,omegaTime,psiTime,maxPsiIterations,writeTime);
     }
     freeState(&s);
   }

@@ -1,5 +1,5 @@
-Nx 799
-My 1599
+Nx 800
+My 1600
 Reynolds Number 700.000000
 Circulation 1.600000
 Timesteps 10000
@@ -12,5 +12,5 @@ Jet Start 404
 Jet End 408
 Jet Amplitude 0.010000
 Jet Frequency 0.050000
-Filename bigout.dat
+Filename ~/data-lb-shared/ippf/bigout.dat
 Save Steps -1
