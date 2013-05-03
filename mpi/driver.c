@@ -90,12 +90,10 @@ int main(int argc, char** argv)
   {
     readConfig(a.configfile,c); 
     initState(&s); 
-    timer calc_t;
-    startTimer(calc_t);
+    timer calc_t = startTimer();
     calculate(s.c,s.sp,s.g,s.f,s.dr,s.v);
     calcTime = stopTimer(calc_t);
-    timer write_t;
-    startTimer(write_t);
+    timer write_t = startTimer();
     writeOutput(s.c,s.sp,s.f,s.v,s.g);
     writeTime = stopTimer(write_t);
     if ( ! parallelRank())

@@ -30,7 +30,7 @@ void zero_out(void* p, size_t s);
 #endif
 
 typedef unsigned long long timer;
-void startTimer(timer t);
+timer startTimer(void);
 double stopTimer(timer t);
 
 #endif

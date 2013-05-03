@@ -107,9 +107,9 @@ static unsigned long long rdtsc(void)
 
 #endif
 
-void startTimer(timer t)
+timer startTimer(void)
 {
-  t = rdtsc();
+  return rdtsc();
 }
 
 #ifndef CLOCK_RATE
