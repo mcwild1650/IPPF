@@ -54,7 +54,7 @@ and left that are considered as boundary.
 And they do not calculate the boundary.
 Small matrices  overlap with the adjacent matrix with two rows or two columns.
 The boundary of each processors are calculated by other processors.
- 
+
 \begin{figure}[H]
 \begin{center}
 \includegraphics[width=10cm]{configuration.png}
@@ -94,7 +94,7 @@ next iteration or not.
 \section{Parallel Boundary Conditions}
 %Micah
 \section{Parallel File IO}
-%Dan
+
 In order to easily verify our results using the serial code,
 we chose to implement single-file IO.
 On the other hand, we would like to get some parallelism in
@@ -119,9 +119,18 @@ without any synchronization until all processes close the file.
 This is theoretically a scalable algorithm, although in practice
 operating system and MPI limits are likely to limit scaling
 to some upper bound.
+
 \section{Results}
+
+\myimage{one_calc.png}{Field computation scaling for input 1}{fig:calc1}
+\myimage{one_file.png}{File IO scaling for input 1}{fig:file1}
+\myimage{two_calc.png}{Field computation scaling for input 2}{fig:calc2}
+\myimage{two_file.png}{File IO scaling for input 2}{fig:file2}
+
 \section{Future Work}
+
 \section{Conclusions}
+
 \section{References}
 
 \end{document}
