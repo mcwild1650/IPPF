@@ -51,7 +51,8 @@ the correct location in the file.
 Each process computes its own offsets and writes concurrently
 without any synchronization until all processes close the file.
 This is theoretically a scalable algorithm, although in practice
-operating system and MPI limits are very likely to occur.
+operating system and MPI limits are likely to limit scaling
+to some upper bound.
 \section{Results}
 \section{Future Work}
 \section{Conclusions}
