@@ -23,7 +23,7 @@ Han Wang
 \maketitle
 \section{Introduction}
 
-We present the parallelization of a finite different fluid dynamics
+We present the parallelization of a finite difference fluid dynamics
 program using MPI and scaling results on the CCNI IBM
 Blue Gene/Q.
 The program implements a solution of 2D flow over a structured grid.
@@ -38,9 +38,9 @@ and file I/O among processes, we show
 good strong scaling up to 4096 processes on the Blue Gene/Q.
 
 \section{Physics}
-%David
+
 \section{Parallel Operation and Optimization}
-%Han
+
 The whole calculation of this code is a iteration procedure.
 Matrix Psi is the matrix of streamlines and matrix Omega is the matrix of vortices.
 Matrix Psi is calculated in function PsiCalc with an iterative method.
@@ -156,7 +156,7 @@ the grid dimensions $m,n$, the partitioner fails.
 This did, in fact, occur in some of our experiments.
 
 \section{Parallel Boundary Conditions}
-%Micah
+
 For any interior point in either Psi or Omega, the value is calculated
 as a function of values in matrix cells one step to the north, south, east, or
 west. This is not true of the extreme boundaries of the matrix. Therefore,
@@ -213,33 +213,59 @@ each floating-point value, and then use
 the correct location in the file.
 Each process computes its own offsets and writes concurrently
 without any synchronization until all processes close the file.
-This is theoretically a scalable algorithm, although in practice
-operating system and MPI limits are likely to limit scaling
-to some upper bound.
+Since there is no overlap or contention in the regions being
+written to,
+this is theoretically a scalable algorithm.
+In practice, we did worry about
+operating system and MPI limits related to only using one file,
+but the results show otherwise.
 
 \section{Results}
 
 Tests on the BlueGene/Q were performed using two configurations.
-The smaller configuration file has dimensions of $800 \cdot 1600$,
+The smaller configuration file has dimensions of $800\times 1600$,
 and runs for 10000 time steps:\\
 \verbatiminput{mpi/bigtestconfig.txt}
 This is a test of a size that can be reasonably computed in serial
 and serves as an example of how IPPF provides faster run times when
 compared to tests that would have been performed serially.
-The larger configuration file has dimensions of $3200 \cdot 6400$
+The larger configuration file has dimensions of $3200\times 6400$
 and runs for only 1000 time steps. This an example of a larger
 test more likely to be comparable to runs intended to be in parallel.
 \verbatiminput{mpi/Bigtestconfig.txt}
+
+Using both these configurations, we perform strong scaling studies
+using 1,2, and 4 processes per core, always starting with
+a single node with all cores utilized.
+All the following figures show the runtime of some portion
+of the simulation plotted over process count for several ratios
+of processes per core.
+The two sections we profiled were the field computation for all
+timesteps and the file writing time.
+The first thing to note is that both these critical sections exhibit
+essentially perfect linear strong scaling for all cases run.
+In particular, the MPI File IO implementation was able to concurrently
+write to one file from thousands of processes.
+
+Figure \ref{fig:calc1} shows the time for calculation using the
+$800\times 1600$ case.
+In this case, the results for 2 and 4 processes per core overlap,
+indicating that there is a slight benefit to using 1 process per core
+which is extinguished with any higher count.
+Figure \ref{fig:file1} shows the runtime for writing restart files
+in parallel for the first input.
+Again 2 and 4 processes per core have the same result.
+For the $3200\times 6400$ test case, Figures \ref{fig:calc2} and
+\ref{fig:file2} show the runtime of field calculation and file IO,
+respectively.
+In both of these figures we note that there is a slight penalty
+when moving from 1 to 2 processes per core, and a higher penalty
+moving from 2 to 4.
 
 \myimage{one_calc.png}{Field computation scaling for input 1}{fig:calc1}
 \myimage{one_file.png}{File IO scaling for input 1}{fig:file1}
 \myimage{two_calc.png}{Field computation scaling for input 2}{fig:calc2}
 \myimage{two_file.png}{File IO scaling for input 2}{fig:file2}
-
-The first thing to note is that both these critical sections exhibit
-essentially perfect linear strong scaling for all cases run.
-In particular, the MPI File IO implementation was able to concurrently
-write to one file from thousands of processes.
 
 \section{Conclusions}
 
@@ -252,6 +278,8 @@ formats so that this program could be used directly by the same
 community currently using the serial version.
 Our general partitioner and portable MPI-based implementation allows the program
 to be used on any machine which has MPI, not just the Blue Gene.
+This program is expected to be used for real engineering tasks
+in the future, and was kept modular and interactive for usability.
 
 \section{References}
 
