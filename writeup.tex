@@ -167,13 +167,13 @@ is determined using just the simulation time and the linear position
 of the cell. However, past the end of the jet, each cell on the Psi
 boundary is always equal to the value of the last cell within the jet.
 This introduces a problem when this last cell is not within the local
-matrix. Generally, this kind of issue is delt with by having the
+matrix. Generally, this kind of issue is dealt with by having the
 owning process broadcast the value of the cell. Fortunately, values
 within the jet do not depend on the values of any fields. The only
 value required that is not stored locally is simply the linear position
 which would have been stored in the position vector. This value can
 be quickly calculated, and, as a result, the value for the jets can be
-computed once locally without requiring any additionaly communication.
+computed once locally without requiring any additional communication.
 The only additional concern is that the lower boundary of Omega requires
 values of Psi two steps into the field instead of one. This does not
 actually introduce any new requirements. For this calculation to fail,
