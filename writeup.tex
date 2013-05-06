@@ -22,6 +22,21 @@ Han Wang
 \begin{document}
 \maketitle
 \section{Introduction}
+
+We present the parallelization of a finite different fluid dynamics
+program using MPI and scaling results on the CCNI IBM
+Blue Gene/Q.
+The program implements a solution of 2D flow over a structured grid.
+It maintains several fields over this grid which are output at
+the end of the simulation.
+Due to the very local finite difference stencil, the use of explicit
+integration, and the structured rectangular grid,
+this program provides one logical approach to distributed-memory
+parallelism.
+By partitioning the grid computation
+and file I/O among processes, we show
+good strong scaling up to 4096 processes on the Blue Gene/Q.
+
 \section{Physics}
 %David
 \section{Parallel Operation and Optimization}
@@ -226,9 +241,17 @@ essentially perfect linear strong scaling for all cases run.
 In particular, the MPI File IO implementation was able to concurrently
 write to one file from thousands of processes.
 
-\section{Future Work}
-
 \section{Conclusions}
+
+We presented a straightforward parallelization of a finite difference
+solver for 2D fluid equations around a parabolic airfoil front.
+Using a 2D partitioning that minimizes maximum local computation
+and communication, we achieve linear scaling up to 4096 processes.
+In addition, we maintain almost exactly the same input and output
+formats so that this program could be used directly by the same
+community currently using the serial version.
+Our general partitioner and portable MPI-based implementation allows the program
+to be used on any machine which has MPI, not just the Blue Gene.
 
 \section{References}
 
