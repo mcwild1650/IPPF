@@ -181,6 +181,11 @@ to some upper bound.
 \myimage{two_calc.png}{Field computation scaling for input 2}{fig:calc2}
 \myimage{two_file.png}{File IO scaling for input 2}{fig:file2}
 
+The first thing to note is that both these critical sections exhibit
+essentially perfect linear strong scaling for all cases run.
+In particular, the MPI File IO implementation was able to concurrently
+write to one file from thousands of processes.
+
 \section{Future Work}
 
 \section{Conclusions}
