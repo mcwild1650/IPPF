@@ -90,7 +90,61 @@ matrix and the new Psi matrix is calculated in all the processor.
 We use \texttt{MPI\_Allreduce} to gather the maximum value in different
 processors and compare them with PsiTol to determine whether to continue
 next iteration or not.
- 
+
+\section{Input}
+
+The serial program uses a command-line dialog to query the user for
+configuration parameters before starting a simulation.
+This includes grid size, fluid physical parameters, simulation
+time and timestep, and artificial jet specifications, if any.
+
+In parallel, such information should not be queried through the
+command line, especially for a batch job.
+We developed a configuration file format to store this information.
+In parallel, our program uses rank 0 to read the configuration file
+and broadcast the data to other ranks.
+Editing this file is also a convenient way to change parameters compared
+with re-running the command line dialog.
+We retain the dialog, which is accessible using the ``config" argument
+when running the program, since it is a descriptive way to generate
+an initial configuration.
+
+Once a configuration is generated, a simulation can be started
+by giving the program two arguments: ``run" and the name of the
+configuration file.
+
+\section{Partitioning}
+
+The parallel operation of this program requires us to partition
+the structured rectangular grid on which fields are defined.
+We use a rather naive and expensive but effective partitioner.
+It tries all possible partitions of a particular class
+and chooses the best one.
+In this case a partition is better than another partition
+if it has both less maximum computation and less
+total communication.
+Maximum computation is the largest number of grid points given to
+any process, and communication is the total number of grid points
+that have to be exchanged to synchronize a field after on step
+of computation.
+
+The class of partitions we choose are those for which two integers
+$p_x,p_y$ exist such that the number of processes is $p_xp_y=p$.
+Each rank is assigned coordinates $(i,j)\in p_x\times p_y$.
+Most ranks ($i<p_x,j<p_y$), receive a sub-grid of the global
+$m\times n$ grid which is of size
+$\lceil\frac{m}{p_x}\rceil\times \lceil\frac{n}{p_y}\rceil$.
+The other ranks receive the remaining grid points along the top
+and right of the grid.
+This class of partitions has some benefits and limitations.
+The main benefit is that maximum workload is well minimized.
+Most ranks have the maximum workload, and only a few have less work.
+The limitation is in the division process along each dimension,
+e.g. not all values of $m$ and $p_x$ are valid.
+In that case that all possible values of $p_x,p_y$ are incompatible with
+the grid dimensions $m,n$, the partitioner fails.
+This did, in fact, occur in some of our experiments.
+
 \section{Parallel Boundary Conditions}
 %Micah
 \section{Parallel File IO}
