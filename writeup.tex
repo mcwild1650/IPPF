@@ -1,6 +1,7 @@
 \documentclass[twocolumn]{article}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{verbatim}
 \newcommand{\myimage}[3]{
 \begin{figure}[!ht]
 \caption{#2}
@@ -147,6 +148,39 @@ This did, in fact, occur in some of our experiments.
 
 \section{Parallel Boundary Conditions}
 %Micah
+For any interior point in either Psi or Omega, the value is calculated
+as a function of values in matrix cells one step to the north, south, east, or
+west. This is not true of the extreme boundaries of the matrix. Therefore,
+calculation of boundaries requires use of both the local and global position
+within the matrix. This results in greater deviation in code structure from
+the serial version when calculating the boundary conditions than the interior.
+For any local boundaries, a check is performed to determine whether the
+local boundary is also a global boundary. For many of the boundaries
+that is the only changes necessary, the value being calculated in a manner
+with similar requirements to the interior. Jets and boundary layers each
+introduce requirements for global position in the boundary layer.
+The side boundaries involve boundary layers which depend additionally
+on the side of the boundary layer where particular cell exists. Jets affect
+the lower boundary, and calculations vary by whether a cell is located
+before, within, or after the region of the jet. Within the jet, Psi
+is determined using just the simulation time and the linear position
+of the cell. However, past the end of the jet, each cell on the Psi
+boundary is always equal to the value of the last cell within the jet.
+This introduces a problem when this last cell is not within the local
+matrix. Generally, this kind of issue is delt with by having the
+owning process broadcast the value of the cell. Fortunately, values
+within the jet do not depend on the values of any fields. The only
+value required that is not stored locally is simply the linear position
+which would have been stored in the position vector. This value can
+be quickly calculated, and, as a result, the value for the jets can be
+computed once locally without requiring any additionaly communication.
+The only additional concern is that the lower boundary of Omega requires
+values of Psi two steps into the field instead of one. This does not
+actually introduce any new requirements. For this calculation to fail,
+the local dimension in $Y$ would be one. Such a partitioning should
+never occur as every owned row would have to be sent twice per round
+of computation.
+
 \section{Parallel File IO}
 
 In order to easily verify our results using the serial code,
@@ -176,6 +210,8 @@ to some upper bound.
 
 \section{Results}
 
+\verbatiminput{mpi/bigtestconfig.txt}
+\verbatiminput{mpi/Bigtestconfig.txt}
 \myimage{one_calc.png}{Field computation scaling for input 1}{fig:calc1}
 \myimage{one_file.png}{File IO scaling for input 1}{fig:file1}
 \myimage{two_calc.png}{Field computation scaling for input 2}{fig:calc2}
