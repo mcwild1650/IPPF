@@ -56,13 +56,7 @@ And they do not calculate the boundary.
 Small matrices  overlap with the adjacent matrix with two rows or two columns.
 The boundary of each processors are calculated by other processors.
 
-\begin{figure}[H]
-\begin{center}
-\includegraphics[width=10cm]{configuration.png}
-\caption{Configuration of Processors}
-\label{fig:configuration}
-\end{center}
-\end{figure}
+\myimage{configuration.png}{Configuration of Processors}{fig:configuration}
 
 Figure  \ref{fig:configuration} is an example.
 In figure \ref{fig:configuration}, "o" is an element in the Psi or Omega matrix.
@@ -210,8 +204,18 @@ to some upper bound.
 
 \section{Results}
 
+Tests on the BlueGene/Q were performed using two configurations.
+The smaller configuration file has dimensions of $800 \cdot 1600$,
+and runs for 10000 time steps:\\
 \verbatiminput{mpi/bigtestconfig.txt}
+This is a test of a size that can be reasonably computed in serial
+and serves as an example of how IPPF provides faster run times when
+compared to tests that would have been performed serially.
+The larger configuration file has dimensions of $3200 \cdot 6400$
+and runs for only 1000 time steps. This an example of a larger
+test more likely to be comparable to runs intended to be in parallel.
 \verbatiminput{mpi/Bigtestconfig.txt}
+
 \myimage{one_calc.png}{Field computation scaling for input 1}{fig:calc1}
 \myimage{one_file.png}{File IO scaling for input 1}{fig:file1}
 \myimage{two_calc.png}{Field computation scaling for input 2}{fig:calc2}
