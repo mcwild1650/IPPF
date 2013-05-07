@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{verbatim}
+\usepackage{paralist}
 \newcommand{\myimage}[3]{
 \begin{figure}[!ht]
 \caption{#2}
@@ -9,6 +10,7 @@
 \includegraphics[width=0.4\textwidth]{#1}
 \end{figure}
 }
+\newcommand{\pd}{\partial}
 \title{Interactive Parallel Parabola Flow}
 \author{
 Micah Corah
@@ -36,8 +38,9 @@ parallelism.
 By partitioning the grid computation
 and file I/O among processes, we show
 good strong scaling up to 4096 processes on the Blue Gene/Q.
-
-\section{Physics}
+This report actually begins with Section \ref{sec:physics},
+describing the physical equations and simulation purpose,
+which is found near the end for formatting purposes.
 
 \section{Parallel Operation and Optimization}
 
@@ -267,6 +270,32 @@ moving from 2 to 4.
 \myimage{two_calc.png}{Field computation scaling for input 2}{fig:calc2}
 \myimage{two_file.png}{File IO scaling for input 2}{fig:file2}
 
+\section{Source Code}
+
+The file \texttt{driver.c} implements the high-level control of the program,
+including selecting between a dialog interface or running from a configuration
+file.
+The \texttt{config.c} file implements configuration handling, including
+the actual dialog, file IO for configuration files, and broadcast
+of configuration data.
+The configuration structure is kept contiguous for easy broadcasting.
+The \texttt{grid.c} file implements the partitioning algorithm and
+returns important variables such as processes along X and Y, local
+process coordinates, etc.
+The \texttt{space.c} file computes X and Y coordinates for each local
+grid point.
+A file \texttt{field.c} provides helper functions for dealing with
+values defined on a 2D grid.
+The \texttt{calc.c} file actually implements the majority of the computation,
+including exchange of partition boundary field values and reductions
+of field differences.
+The \texttt{restart.c} file implements serial and parallel versions
+of the output file IO, including the scalable MPI-based writing.
+Finally, \texttt{tools.c} implements basic helper functions for
+memory management, flow control, and communication.
+The source code can be found under Dan's account (\texttt{PPCibaned})
+on the Kratos machine.
+
 \section{Conclusions}
 
 We presented a straightforward parallelization of a finite difference
@@ -281,6 +310,9 @@ to be used on any machine which has MPI, not just the Blue Gene.
 This program is expected to be used for real engineering tasks
 in the future, and was kept modular and interactive for usability.
 
-\section{References}
+\onecolumn
+\section{Physics}
+\label{sec:physics}
+\input{physics.tex}
 
 \end{document}
