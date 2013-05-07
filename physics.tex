@@ -50,7 +50,7 @@ where $\psi$ is the stream function and $\omega$ is the vorticity, they can be r
 \label{eq:4}
 \end{equation}
 
-Parabolic coordinates, $x=(\mu^2-\eta^2)/2$ and $y=\mu\eta$ are then used to transform the field into a Cartesian coordinate space. Here $\mu$ is the coordinate parallel to the surface of the parabola and $\eta$ is the coordinate normal to the surface. The parabolic surface is now described by the $\eta=1$ surface and flow evolves in the domain $-\infty < \mu < \infty$, $\eta> 1$. In parabolic coordinates the velocity components can be given by:
+Parabolic coordinates, $x=(\mu^2-\eta^2)/2$ and $y=\mu\eta$ are then used to transform the field into a Cartesian coordinate space. Here $\mu$ is the coordinate parallel to the surface of the parabola and $\eta$ is the coordinate normal to the surface. The parabolic surface is now described by the $\eta=1$ surface and flow evolves in the domain $-\infty < \mu < \infty$, $\eta> 1$. In parabolic coordinates the velocity components are given by:
 
 \[
 V_\mu=\frac{1}{\sqrt{\mu^2+\eta^2}} \frac{\pd \psi}{\pd \eta}, \quad\quad
@@ -67,12 +67,10 @@ and (\ref{eq:4}) is given by
 \omega = \frac{-1}{\mu^2 + \eta^2} \left(\frac{\pd^2 \psi}{\pd \mu^2} + \frac{\pd^2 \psi}{\pd \eta^2} \right)
 \end{equation}
 
-Equation \ref{eq:7} is subjected to the tangency and no slip flow conditions on the parabola surface, i.e. $V_\eta(\mu,\eta=1) = 0$, $\psi(\mu,\eta=1) = 0$, as well as boundary conditions on the far field.
+Equation \ref{eq:7} is subjected to the tangency and no slip boundary conditions on the parabola surface, i.e. $V_\eta(\mu,\eta=1) = 0$, $\psi(\mu,\eta=1) = 0$, as well as boundary conditions on the far field.
 
-For a numerical implementation, the semi-infinite domain $\eta > 1$ is reduced to the domain $-\mu_{max} < \mu < \mu_{max}$ and $1 < \eta < \eta_{max}$, where $\mu_{max}$ and $\eta_{max}$ are sufficiently large. This domain is discretized by a uniform mesh with constant step sizes in both directions $\Delta \mu$ and $\Delta \eta$ respectively. The index of each grid point is ($i$,$j$) respectively, where $-M \le i \le M$, $1 \le j \le N$. Time is discretized by constant time steps $\Delta t$ with index $n$ for each time level. The time
-derivative in
-(\ref{eq:7})
-is approximated by a first-order forward difference and second-order central
+For a numerical implementation, the semi-infinite domain $\eta > 1$ is reduced to the domain $-\mu_{max} < \mu < \mu_{max}$ and $1 < \eta < \eta_{max}$, where $\mu_{max}$ and $\eta_{max}$ are sufficiently large. This domain is discretized by a uniform mesh with constant step sizes in both directions $\Delta \mu$ and $\Delta \eta$ espectively. The index of each grid point is ($i$,$j$) respectively, where $-M \le i \le M$, $1 \le j \le N$. Time is discretized by constant time steps $\Delta t$ with index $n$ for each time level. The time
+derivative in (\ref{eq:7}) is approximated by a first-order forward difference and second-order central
 differences are used to approximate the spatial derivatives. The discretized formulation of (\ref{eq:7}) is:
 
 \[
@@ -118,11 +116,21 @@ V_\mu^{n+1}=\frac{1}{\sqrt{\mu_{i,j}^2+\eta_{i,j}^2}} \frac{\psi_{i,j+1}^{n+1} -
 V_\eta^{n+1}=\frac{-1}{\sqrt{\mu_{i,j}^2+\eta_{i,j}^2}} \frac{\psi_{i+1,j}^{n+1} - \psi_{i-1,j}^{n+1}}{2\Delta \mu}
 \end{equation}
 
-The computations are first-order accurate in time and second-order accurate in space and are consistent with the original equations (\ref{eq:7}) as the mesh is refined. The field of velocity and vorticity at time level $n+1$ are used to advance the solution to the next time step. For a given $Re_M$ and $\tilde{A}$, where $\tilde{A}$ is a variable related to $\alpha$, the solution of (\ref{eq:9}) through (\ref{eq:11}) is advanced in time until time-asymptotic behavior, steady or periodic, is achieved.
+The field of velocity and vorticity at time level $n+1$ are used to advance the solution to the next time step. For a given $Re_M$ and $\tilde{A}$, where $\tilde{A}$ is a variable related to $\alpha$, the solution of (\ref{eq:9}) through (\ref{eq:11}) is advanced in time until time-asymptotic behavior, steady or periodic, is achieved.
 
-The computations are initiated in the following way. At a given $Re_M$ and $\tilde{A} = 0$, we start with the inviscid, potential flow solution as an initial state and march in time until a steady, time-asymptotic state of the viscous flow problem is found. Then, we use this solution as an initial state for the computation of the flow evolution at same $Re_M$ at an increased incremental value of $\tilde{A}$ , for example $\tilde{A} = 0.1$. Similarly, each time-asymptotic state is used as an initial state for the computation of flow evolution at the next nearby value of $\tilde{A}$.
+The computations are initiated in the following way. At a given $Re_M$ and $\tilde{A} = 0$, the inviscid, potential flow solution is used as the initial state and a simulation is run until a steady, time-asymptotic state of the viscous flow problem is found. This solution is then used as an initial state for the computation of the flow at the same $Re_M$  and an increased value of $\tilde{A}$ , for example $\tilde{A} = 0.1$. This process is repeated for increasing $\tilde{A}$.
 
 An additional aspect of this program is it's ability to simulate synthetic jets on the parabolic surface. A synthetic jet is a small oscillating surface which introduces pulses of air into the flow at a particular frequency. There are experimental results which show that flow seperation can be reduced, lift increased, and the onset of stall delayed if these jets are properly placed and oscillated at a specific frequency. This location and frequency is dependent on the characteristics of the flow including the Reynolds number and the corresponding shedding frequency at a particular angle of attack. By modifying jet location and frequency and observing the effect on the simulation, this program allows the ideal values for these parameters to be determined.
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{jets.pdf}
+\caption{Effect of jet on $\mu$ velocity}
+\label{fig:jets}
+\end{figure}
+
+
+The effect of this can be seen in Figure \ref{fig:jets}. By adding a synthetic jet near the stagnation point, the peak velocity was increased and the seperation bubble (negitive portion after the peak) was reduced in size. The effect of this is increased lift and reduced drag, which in practical use translates to better fuel efficiency.
+
 
 
 \end{document}
