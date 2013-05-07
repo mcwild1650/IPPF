@@ -1,13 +1,27 @@
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{paralist}
+\usepackage{graphicx}
 
 \newcommand{\pd}{\partial}
 
 \begin{document}
 
-This program solves the Vorticity-Streamline equations for the flow of an incompressible fluid around a conic parabola at various modified Reynolds numbers and Circulation parameters with or without a synthetic jet modification.
+This program models the flow around a 2D parabola at various Reynolds numbers ($Re$) and angles of attack ($\alpha$). A 2D parabola is a good model for the leading edge of a symmetric airfoil, such as the NACA 0012. This program is used to observe characteristics of the flow and to determine the angle of attack at which the flow seperates and stall occurs ($\alpha_{stall}(Re)$).
 
-The two dimensional, viscous, incompressible and unsteady Navier-Stokes equatioins for the inner flow around a canonic parabola are:
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FF1p6.pdf}
+\caption{Flow field for $Re_M = 700$, $\tilde{A} = 1.6$}
+\label{fig:FF1p6}
+\end{figure}
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FF2p0.pdf}
+\caption{$Re_M = 700$, $\tilde{A} = 2.0$}
+\label{fig:FF2p0}
+\end{figure}
+
+To simulate the flow, the Navier-Stokes equations (\ref{eq:1}) are solved using an iterative method. In these equations, $x$ is the axial coordinate, $y$ is the perpendicular coordinate, , $u$ and $v$ are the axial and perpendicular velocities, respectivly, $p$ is the local pressure, and $Re_M$ is the Reynolds number $Re$ rescaled for computational purposes.
 
 \[
 \frac{\pd u}{\pd x} + \frac{\pd v}{\pd y} = 0
@@ -16,90 +30,71 @@ The two dimensional, viscous, incompressible and unsteady Navier-Stokes equatioi
 \frac{\pd u}{\pd t} + u \frac{\pd u}{\pd x} + v \frac{\pd u}{\pd y} = - \frac{\pd p}{\pd x} + \frac{1}{Re_M} \nabla^2 u
 \]
 \begin{equation}
-\label{eq:NS1}
+\label{eq:1}
 \frac{\pd v}{\pd t} + v \frac{\pd v}{\pd x} + v \frac{\pd v}{\pd y} = - \frac{\pd p}{\pd y} + \frac{1}{Re_M} \nabla^2 v
 \end{equation}
-
+%
 Using
-
 \begin{equation}
-u=\frac{\pd \psi}{\pd y},\: v=\frac{\pd \psi}{\pd x},\: \mathrm{and}\: \omega=\frac{\pd v}{\pd x} - \frac{\pd u}{\pd y},
+\label{eq:2}
+u=\frac{\pd \psi}{\pd y},\: v=\frac{\pd \psi}{\pd x},\; \mathrm{and}\; \omega=\frac{\pd v}{\pd x} - \frac{\pd u}{\pd y},
 \end{equation}
-
-(\ref{eq:NS1}) can be reduced to:
+%
+where $\psi$ is the stream function and $\omega$ is the vorticity, they can be reduced to:
 
 \[
 \frac{\pd \omega}{\pd t} + \frac{\pd \psi}{\pd y} \frac{\pd \omega}{\pd x} - \frac{\pd \psi}{\pd x} \frac{\pd \omega}{\pd y} = \frac{1}{Re_M} \nabla^2\omega
 \]
 \begin{equation}
 \frac{\pd^2 \psi}{\pd x^2} + \frac{\pd^2 \psi}{\pd y^2} = -\omega.
-\label{eq:NS2D}
+\label{eq:4}
 \end{equation}
 
-Parabolic coordinates, $x=(\mu^2-\eta^2)/2$ and $y=\mu\eta$ are used to transform the field into a Cartesian coordinate space. Here $\mu$ is the coordinate parallel to the surface of the parabola and $\eta$  being the coordinate normal to the surface. The canonic parabola is now described by the $\eta=1$ surface and flow evolves in the domain $-\infty < \mu < \infty$, $\eta> 1$. In parabolic coordinates the velocity components can be given by:
+Parabolic coordinates, $x=(\mu^2-\eta^2)/2$ and $y=\mu\eta$ are then used to transform the field into a Cartesian coordinate space. Here $\mu$ is the coordinate parallel to the surface of the parabola and $\eta$ is the coordinate normal to the surface. The parabolic surface is now described by the $\eta=1$ surface and flow evolves in the domain $-\infty < \mu < \infty$, $\eta> 1$. In parabolic coordinates the velocity components can be given by:
 
 \[
 V_\mu=\frac{1}{\sqrt{\mu^2+\eta^2}} \frac{\pd \psi}{\pd \eta}, \quad\quad
 V_\eta=\frac{-1}{\sqrt{\mu^2+\eta^2}} \frac{\pd \psi}{\pd \mu}
 \]
-
-
-Then, the Navier-Stokes equations (\ref{eq:NS2D}) become:
-\begin{equation}
-\frac{\pd \omega}{\pd t} + \frac{1}{\mu^2 + \eta^2} \left(\frac{\pd \psi}{\pd \eta} \frac{\pd \omega}{\pd \mu} - \frac{\pd \psi}{\pd \mu} \frac{\pd \omega}{\pd \eta} \right) = \frac{1}{Re_M} \frac{1}{\mu^2 + \eta^2} \left(\frac{\pd^2 \omega}{\pd \mu^2} + \frac{\pd^2 \omega}{\pd \eta^2} \right)
-\end{equation}
-
-\begin{equation}
-\omega = \frac{-1}{\mu^2 + \eta^2} \left(\frac{\pd^2 \psi}{\pd \mu^2} + \frac{\pd^2 \psi}{\pd \eta^2} \right)
-\end{equation}
-
-The vorticity transport and stream function equations were re-arranged to produce the following conservative form:
-
+% 
+and (\ref{eq:4}) is given by
 \[
 \frac{\pd \omega}{\pd t} + \frac{1}{\mu^2 + \eta^2} \left[\frac{\pd}{\pd \mu} \left(\sqrt{\mu^2 + \eta^2} V_\eta \omega \right) \right] = \frac{1}{Re_M(\mu^2 + \eta^2)} \left(\frac{\pd^2 \omega}{\pd \mu^2} + \frac{\pd^2 \omega}{\pd \eta^2} \right)
 \]
 
 \begin{equation}
+\label{eq:7}
 \omega = \frac{-1}{\mu^2 + \eta^2} \left(\frac{\pd^2 \psi}{\pd \mu^2} + \frac{\pd^2 \psi}{\pd \eta^2} \right)
-\label{eq:consv}
 \end{equation}
 
-Equations \ref{eq:consv} are subjected to the tangency and no slip flow conditions on the canonic parabola surface, i.e. $V_\eta(\mu,\eta=1) = 0$, $\psi(\mu,\eta=1) = 0$. Using the inversion of the coordinates transform, $\eta = \sqrt{ \sqrt{x^2+y^2} - x}$ and $\mu = sqrt{ \sqrt{x^2+y^2} + x}$, it can be shown that the far-field behavior as described by (A.5) results in
-$\Phi^* \approx \frac{1}{2} (\mu^2+\eta^2) + \eta * \tilde{A}\mu$.
-In the far field:
-$V_\mu = \frac{\mu + \tilde{A}}{\sqrt{\mu^2 + \eta^2}}$ and $V_\eta = \frac{1 - \eta}{\sqrt{\mu^2 + \eta^2}}$, from which:
-
-\begin{equation}
-\psi = \mu\eta - \mu + \tilde{A}\eta
-\end{equation}
-
-as both $\mu$ and $\eta$ tend to infinity. Note that the far field behavior, when applied to the whole domain, is the inviscid, steady-state solution of the problem for all $\tilde{A}$ .
+Equation \ref{eq:7} is subjected to the tangency and no slip flow conditions on the parabola surface, i.e. $V_\eta(\mu,\eta=1) = 0$, $\psi(\mu,\eta=1) = 0$, as well as boundary conditions on the far field.
 
 For a numerical implementation, the semi-infinite domain $\eta > 1$ is reduced to the domain $-\mu_{max} < \mu < \mu_{max}$ and $1 < \eta < \eta_{max}$, where $\mu_{max}$ and $\eta_{max}$ are sufficiently large. This domain is discretized by a uniform mesh with constant step sizes in both directions $\Delta \mu$ and $\Delta \eta$ respectively. The index of each grid point is ($i$,$j$) respectively, where $-M \le i \le M$, $1 \le j \le N$. Time is discretized by constant time steps $\Delta t$ with index $n$ for each time level. The time
 derivative in
-(\ref{eq:consv})
+(\ref{eq:7})
 is approximated by a first-order forward difference and second-order central
-differences are used to approximate the spatial derivatives. The discretized formulation of (\ref{eq:consv}) is:
+differences are used to approximate the spatial derivatives. The discretized formulation of (\ref{eq:7}) is:
 
 \[
 \frac{\omega^{n+1}_{i,j}+\omega^n_{i,j}}{\Delta t} + \frac{1}{s^2_{i,j}}
 \]
 \[
-\left[
+\cdot \left(
 \frac{s_{i+1,j}V^n_{\mu_{i+1,j}}\omega^n_{i+1,j}-s_{i-1,j}V^n_{\mu_{i-1,j}}\omega^n_{i-1,j}}
      {2\Delta\mu}
++
 \frac{s_{i,j+1}V^n_{\mu_{i,j+1}}\omega^n_{i,j+1}-s_{i,j-1}V^n_{\mu_{i,j-1}}\omega^n_{i,j-1}}
      {2\Delta\eta}
-\right]
+\right)
 \]
 \begin{equation}
 \label{eq:9}
-=\frac{1}{\text{Re}_\text{M}s^2_{i,j}}
-\left[
+=\frac{1}{Re_M s^2_{i,j}}
+\left(
 \frac{\omega^n_{i-1,j}-2\omega^n_{i,j}+\omega^n_{i+1,j}}{(\Delta\mu)^2}
 +
 \frac{\omega^n_{i,j-1}-2\omega^n_{i,j}+\omega^n_{i,j-1}}{(\Delta\eta)^2}
-\right]
+\right)
 \end{equation}
 where $s_{i,j}=\sqrt{\mu^2_{i,j}+\eta^2_{i,j}}$.
 Equation \ref{eq:9} is rearranged to solve for $\omega^{n+1}_{i,j}$ in terms of the fields of
@@ -107,68 +102,27 @@ vorticity and velocity at time level $n$.
 Once the vorticity field is progressed in time, the stream
 function at time level $n+1$ is solved using spatial central differences:
 \begin{equation}
-\frac{\Psi^{n+1}_{i-1,j}-2\Psi^{n+1}_{i,j}+\Psi^{n+1}_{i+1,j}}{(\Delta\mu)^2}+
-\frac{\Psi^{n+1}_{i,j-1}-2\Psi^{n+1}_{i,j}+\Psi^{n+1}_{i,j+1}}{(\Delta\eta)^2}
+\label{eq:10}
+\frac{\psi^{n+1}_{i-1,j}-2\psi^{n+1}_{i,j}+\psi^{n+1}_{i+1,j}}{(\Delta\mu)^2}+
+\frac{\psi^{n+1}_{i,j-1}-2\psi^{n+1}_{i,j}+\psi^{n+1}_{i,j+1}}{(\Delta\eta)^2}
 =-\omega^{n+1}_{i,j}
 \end{equation}
 
-Equation (\ref{}) is solved by the Jacobi iteration method. Once convergence to a given tolerance is achieved, the velocity field at time level $n+1$ can be determined from:
+Equation \ref{eq:10} is solved by the Jacobi iteration method. Once convergence to a given tolerance is achieved, the velocity field at time level $n+1$ can be determined from:
 
+\[
+V_\mu^{n+1}=\frac{1}{\sqrt{\mu_{i,j}^2+\eta_{i,j}^2}} \frac{\psi_{i,j+1}^{n+1} - \psi_{i,j-1}^{n+1}}{2\Delta \eta},
+\]
 \begin{equation}
-V_\mu^{n+1}=\frac{1}{\sqrt{\mu_{i,j}^2+\eta_{i,j}^2}} \frac{\psi_{i,j+1}^{n+1} - \psi_{i,j-1}^{n+1}}{2\Delta \eta}, \quad V_\eta^{n+1}=\frac{-1}{\sqrt{\mu_{i,j}^2+\eta_{i,j}^2}} \frac{\psi_{i+1,j}^{n+1} - \psi_{i-1,j}^{n+1}}{2\Delta \mu}
+\label{eq:11}
+V_\eta^{n+1}=\frac{-1}{\sqrt{\mu_{i,j}^2+\eta_{i,j}^2}} \frac{\psi_{i+1,j}^{n+1} - \psi_{i-1,j}^{n+1}}{2\Delta \mu}
 \end{equation}
-%(11)
-%Equations (9) and (10) are solved under the following conditions: (1) a wall boundary
-%condition  in, j 1  0 for all  M  i  M ; (2) an inflow far-field  in, j  N , given by the far-field
-%potential flow behavior (8) and in, j  N  0 are employed for  M  i  M ; (3) an outflow
-% in  M , j , given by the far-field flow behavior (8) and in  M , j  0 are used for N BL  j  N ; (4) a
-% 
-%Neumann boundary condition 
-%(BCS)
-%along the outflow boundaries
-%i   M for 1  j  N BL   which allows the outflow to evolve naturally. Here N BL  N / 20 is used; 
-%(5) the vorticity in, j 1 (along the parabola surface j  1 ) for  M  i  M is computed by a
-%second order, forward difference approximation in the j direction which also accounts for the
-%wall no-slip condition along a stationary boundary (see details in Hoffmann & Chiang 1993), i.e.
-%in, j 1  7 in, j 1  8 in, j  2   in, j  3 / 2( y ) 2 .
-%The computations are first-order accurate in time and second-order accurate in space and are
-%consistent with the original equations (7) as the mesh is refined. The field of velocity and
-%12
-%Page 13 of 50
-%vorticity at time level n+1 are used to advance the solution to the next time step. For a given
-%~
-%ReM and A , the solution of (9) through (11) is advanced in time until time-asymptotic behavior,
-%steady or periodic, is achieved.
-%~
-%The computations are initiated in the following way. At a given ReM and A  0 we start with
-%the inviscid, potential flow solution as an initial state and march in time until a steady, time-
-%asymmtotic state of the viscous flow problem is found. Then, we use this solution as an initial
-%state for the computation of the flow evolution at same ReM at an increased incremental value
-%~
-%~
-%of A , for example A  0.1. Similarly, each time-asymptotic state is used as an initial state for the
-%~
-%computation of flow evolution at the next nearby value of A.
-%Certain numerical stability criteria must be satisfied in the computations. Here we require
-%that the Courant number Ck, diffusion number dk, and the cell Reynolds number ReC:
-%(12)
-%obey certain limitations. In the present numerical calculations, a=Umax=1 and the subscript k on the
-%spatial difference indicates or . Extending von Neumann numerical linear stability analysis (see
-%Hoffmann & Chiang, 1993, chapter 4 and Roache, 1998 chapter 3) to the present forward in time-
-%central in space differencing scheme leads to the stability requirements in a two- dimensional
-%problem: C = C+C ≤ 1, d = d+d ≤ 1/2, and ReC ≤ 4/C. For example: with ReM = 700 and 
-%and  are 0.2 and 0.025, respectively, the Courant number dictates that t be less than 0.0222 and
-%the diffusion number states it must be less than 0.215 while the cell Reynolds number (~141 in this
-%case) criterion calls for a t ≤ 0.00063. Clearly, for this case, the cell Reynolds number criterion is
-%the most restrictive and is therefore used as the maximum threshold for t, dictating small time steps.
-%Further, we refer to the work by Thompson, Webb & Hoffman (1985), later verified by Sousa
-%(2003), which states that the cell Reynolds number restriction is overly restrictive for stable
-%calculations. In spite of this fact, we proceed to use it as a buffer against numerical instabilities that
-%may result from non-linear effects. As a result, the CFL number is less than 0.01 which provides a
-%high accuracy of resolution of velocity signals in time, specifically of the low-frequency T-S waves
-%that convect along the parabola surface and are involved in the delay of stall.
 
+The computations are first-order accurate in time and second-order accurate in space and are consistent with the original equations (\ref{eq:7}) as the mesh is refined. The field of velocity and vorticity at time level $n+1$ are used to advance the solution to the next time step. For a given $Re_M$ and $\tilde{A}$, where $\tilde{A}$ is a variable related to $\alpha$, the solution of (\ref{eq:9}) through (\ref{eq:11}) is advanced in time until time-asymptotic behavior, steady or periodic, is achieved.
 
+The computations are initiated in the following way. At a given $Re_M$ and $\tilde{A} = 0$, we start with the inviscid, potential flow solution as an initial state and march in time until a steady, time-asymptotic state of the viscous flow problem is found. Then, we use this solution as an initial state for the computation of the flow evolution at same $Re_M$ at an increased incremental value of $\tilde{A}$ , for example $\tilde{A} = 0.1$. Similarly, each time-asymptotic state is used as an initial state for the computation of flow evolution at the next nearby value of $\tilde{A}$.
+
+An additional aspect of this program is it's ability to simulate synthetic jets on the parabolic surface. A synthetic jet is a small oscillating surface which introduces pulses of air into the flow at a particular frequency. There are experimental results which show that flow seperation can be reduced, lift increased, and the onset of stall delayed if these jets are properly placed and oscillated at a specific frequency. This location and frequency is dependent on the characteristics of the flow including the Reynolds number and the corresponding shedding frequency at a particular angle of attack. By modifying jet location and frequency and observing the effect on the simulation, this program allows the ideal values for these parameters to be determined.
 
 
 \end{document}
